@@ -26,7 +26,7 @@ export function HeroSection() {
 
           {/* Main Heading */}
           <h1 className="text-4xl font-bold tracking-tight sm:text-6xl lg:text-7xl text-balance">
-            Your <span className="text-primary">Smart Travel</span> Companion for India
+            Your <span className="text-primary">TRIPMATE</span> Companion for India Tour
           </h1>
 
           {/* Subheading */}

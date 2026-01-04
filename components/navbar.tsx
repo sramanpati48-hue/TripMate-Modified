@@ -73,8 +73,8 @@ export function Navbar() {
               <MapPin className="h-5 w-5 text-primary-foreground" />
             </div>
             <div className="flex flex-col">
-              <span className="text-lg font-bold text-foreground">Smart Travel</span>
-              <span className="text-xs text-muted-foreground -mt-1">Explore India</span>
+              <span className="text-lg font-bold text-foreground">TRIPMATE</span>
+              <span className="text-xs text-muted-foreground -mt-1">Your Travel Companion</span>
             </div>
           </Link>
 
