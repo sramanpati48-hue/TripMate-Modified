@@ -1,12 +1,12 @@
 // Prisma Schema for Travel App
-// Database: SQLite (for development) - can be switched to PostgreSQL/MySQL for production
+// Database: PostgreSQL (Supabase)
 
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
