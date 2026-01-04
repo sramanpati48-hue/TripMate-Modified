@@ -1,0 +1,165 @@
+// Prisma Schema for Travel App
+// Database: SQLite (for development) - can be switched to PostgreSQL/MySQL for production
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String   @id @default(cuid())
+  email         String   @unique
+  password      String   // Hashed password
+  name          String
+  phone         String?
+  avatar        String?  // Profile picture URL
+  dateOfBirth   DateTime?
+  gender        String?
+  nationality   String?
+  address       String?
+  city          String?
+  country       String?
+  preferences   String?  // Travel preferences as JSON string
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  
+  // Relations
+  trips         Trip[]
+  favorites     Favorite[]
+  reviews       Review[]
+  bookings      Booking[]
+  travelProfile TravelProfile?
+  sentRequests  TravelMatchRequest[] @relation("SentRequests")
+  receivedRequests TravelMatchRequest[] @relation("ReceivedRequests")
+}
+
+model Trip {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  destination   String
+  startDate     DateTime
+  endDate       DateTime
+  budget        Float?
+  travelers     Int      @default(1)
+  itinerary     String?  // AI-generated itinerary as JSON string
+  activities    String?  // Planned activities as JSON string
+  status        String   @default("planned") // planned, ongoing, completed, cancelled
+  
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Favorite {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  placeId       String
+  placeName     String
+  placeImage    String?
+  placeLocation String?
+  placeRating   Float?
+  placeCategory String?
+  
+  createdAt     DateTime @default(now())
+  
+  @@unique([userId, placeId])
+}
+
+model Review {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  placeId       String
+  placeName     String
+  rating        Int      // 1-5
+  comment       String?
+  images        String?  // Array of image URLs as JSON string
+  visitDate     DateTime?
+  
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Booking {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  type          String   // hotel, flight, activity, tour
+  name          String
+  destination   String
+  checkIn       DateTime?
+  checkOut      DateTime?
+  guests        Int?
+  totalPrice    Float
+  status        String   @default("pending") // pending, confirmed, cancelled
+  bookingRef    String?
+  
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+// Matchmaker Feature Models
+model TravelProfile {
+  id                String   @id @default(cuid())
+  userId            String   @unique
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // Gender and preferences
+  gender            String?  // male, female, non-binary, prefer-not-to-say
+  preferredGender   String?  // male, female, any, same-as-me
+  
+  // Travel style
+  travelStyle       String?  // adventure, relaxation, cultural, luxury, budget, backpacker
+  groupPreference   String   @default("any") // solo, group, any
+  groupSize         String?  // 2-3, 4-6, 7+, flexible
+  
+  // Interests (stored as JSON array)
+  interests         String?  // ["hiking", "food", "photography", "nightlife", etc.]
+  
+  // Travel details
+  destinations      String?  // Preferred destinations as JSON array
+  languages         String?  // Languages spoken as JSON array
+  availability      String?  // Available travel dates/periods as JSON
+  
+  // Bio
+  bio               String?  // Short description about travel preferences
+  ageRange          String?  // 18-25, 26-35, 36-45, 46+
+  
+  // Settings
+  isActive          Boolean  @default(true) // Show profile in matches
+  verified          Boolean  @default(false) // Verified traveler badge
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+model TravelMatchRequest {
+  id                String   @id @default(cuid())
+  senderId          String
+  sender            User     @relation("SentRequests", fields: [senderId], references: [id], onDelete: Cascade)
+  
+  receiverId        String
+  receiver          User     @relation("ReceivedRequests", fields: [receiverId], references: [id], onDelete: Cascade)
+  
+  // Request details
+  message           String?  // Personal message
+  destination       String?  // Proposed destination
+  startDate         DateTime?
+  endDate           DateTime?
+  
+  status            String   @default("pending") // pending, accepted, rejected, cancelled
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  @@unique([senderId, receiverId, destination])
+}
