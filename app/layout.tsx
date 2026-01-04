@@ -9,7 +9,7 @@ const _dmSans = DM_Sans({ subsets: ["latin"] })
 const _geistMono = Geist_Mono({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "ShowcaseX - Unlock Your Next Adventure",
+  title: "TripMate - Your Smart Travel Companion",
   description: "Your smart travel companion for discovering destinations, planning trips, and exploring the world.",
   generator: "v0.app",
   icons: {

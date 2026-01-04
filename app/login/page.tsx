@@ -74,7 +74,7 @@ export default function LoginPage() {
             <div className="flex justify-center mb-4">
               <div className="flex items-center gap-2">
                 <MapPin className="h-8 w-8 text-primary" />
-                <span className="text-2xl font-bold">ShowcaseX</span>
+                <span className="text-2xl font-bold">TripMate</span>
               </div>
             </div>
             <CardTitle className="text-2xl">Welcome back</CardTitle>

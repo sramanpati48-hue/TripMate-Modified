@@ -43,7 +43,7 @@ export function AdminSidebar() {
       <div className="p-4 border-b flex items-center justify-between">
         <Link href="/admin" className={cn("flex items-center gap-2", isCollapsed && "justify-center")}>
           <MapPin className="h-6 w-6 text-sidebar-primary shrink-0" />
-          {!isCollapsed && <span className="font-bold text-sidebar-foreground">ShowcaseX</span>}
+          {!isCollapsed && <span className="font-bold text-sidebar-foreground">TripMate</span>}
         </Link>
         <Button
           variant="ghost"

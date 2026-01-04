@@ -9,7 +9,7 @@ export function Footer() {
           <div className="space-y-4">
             <Link href="/" className="flex items-center gap-2">
               <MapPin className="h-6 w-6 text-primary" />
-              <span className="text-xl font-bold">ShowcaseX</span>
+              <span className="text-xl font-bold">TripMate</span>
             </Link>
             <p className="text-sm text-muted-foreground">
               Your smart travel companion for discovering amazing destinations around the world.
@@ -66,7 +66,7 @@ export function Footer() {
         </div>
 
         <div className="mt-12 border-t pt-8 text-center text-sm text-muted-foreground">
-          <p>&copy; {new Date().getFullYear()} ShowcaseX. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} TripMate. All rights reserved.</p>
         </div>
       </div>
     </footer>
