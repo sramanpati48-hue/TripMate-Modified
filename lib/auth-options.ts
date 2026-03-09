@@ -1,12 +1,10 @@
 import { NextAuthOptions } from 'next-auth'
 import GoogleProvider from 'next-auth/providers/google'
 import CredentialsProvider from 'next-auth/providers/credentials'
-import { PrismaAdapter } from '@auth/prisma-adapter'
 import { prisma } from './prisma'
 import { verifyPassword } from './auth'
 
 export const authOptions: NextAuthOptions = {
-  adapter: PrismaAdapter(prisma) as any,
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID || '',
@@ -54,9 +52,58 @@ export const authOptions: NextAuthOptions = {
     error: '/login',
   },
   callbacks: {
+    async signIn({ user, account, profile }) {
+      // Handle Google OAuth: create or update user in database
+      if (account?.provider === 'google' && profile?.email) {
+        try {
+          const existingUser = await prisma.user.findUnique({
+            where: { email: profile.email.toLowerCase() }
+          })
+
+          if (!existingUser) {
+            // Create new user from Google profile
+            const newUser = await prisma.user.create({
+              data: {
+                email: profile.email.toLowerCase(),
+                name: profile.name || 'Google User',
+                image: (profile as any).picture || null,
+                avatar: (profile as any).picture || null,
+                emailVerified: new Date(),
+              }
+            })
+            user.id = newUser.id
+          } else {
+            user.id = existingUser.id
+            // Update avatar if not set
+            if (!existingUser.avatar && (profile as any).picture) {
+              await prisma.user.update({
+                where: { id: existingUser.id },
+                data: { 
+                  avatar: (profile as any).picture,
+                  image: (profile as any).picture,
+                }
+              })
+            }
+          }
+        } catch (error) {
+          console.error('Google sign-in error:', error)
+          return false
+        }
+      }
+      return true
+    },
     async jwt({ token, user, account }) {
       if (user) {
         token.id = user.id
+      }
+      // On Google sign-in, ensure we have the DB user id
+      if (account?.provider === 'google' && token.email) {
+        const dbUser = await prisma.user.findUnique({
+          where: { email: token.email.toLowerCase() }
+        })
+        if (dbUser) {
+          token.id = dbUser.id
+        }
       }
       return token
     },
