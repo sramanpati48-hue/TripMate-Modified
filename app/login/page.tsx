@@ -2,8 +2,9 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
+import { useSearchParams } from "next/navigation"
 import { signIn } from "next-auth/react"
 import { Navbar } from "@/components/navbar"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -13,12 +14,29 @@ import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
 import { MapPin, Mail, Lock, Eye, EyeOff, Loader2 } from "lucide-react"
 
-export default function LoginPage() {
+const errorMessages: Record<string, string> = {
+  OAuthCallback: 'Google sign-in failed. Please try again.',
+  OAuthSignin: 'Could not start Google sign-in. Please try again.',
+  OAuthAccountNotLinked: 'This email is already registered with a password. Please sign in with email/password.',
+  Callback: 'Authentication callback error. Please try again.',
+  Default: 'An authentication error occurred. Please try again.',
+}
+
+export function LoginPageContent() {
+  const searchParams = useSearchParams()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
+
+  // Check for NextAuth error in URL params
+  useEffect(() => {
+    const errorParam = searchParams.get('error')
+    if (errorParam) {
+      setError(errorMessages[errorParam] || errorMessages.Default + ` (${errorParam})`)
+    }
+  }, [searchParams])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -202,5 +220,16 @@ export default function LoginPage() {
         </Card>
       </main>
     </div>
+  )
+}
+
+// Wrap with Suspense for useSearchParams
+import { Suspense } from "react"
+
+export default function LoginPageWrapper() {
+  return (
+    <Suspense fallback={null}>
+      <LoginPageContent />
+    </Suspense>
   )
 }
