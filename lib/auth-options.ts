@@ -86,8 +86,9 @@ export const authOptions: NextAuthOptions = {
             }
           }
         } catch (error) {
-          console.error('Google sign-in error:', error)
-          return false
+          console.error('Google sign-in DB error:', error)
+          // Don't block sign-in if DB fails - allow sign-in with basic info
+          return true
         }
       }
       return true
