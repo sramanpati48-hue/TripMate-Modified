@@ -44,6 +44,17 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Check if user has a password (OAuth-only users won't)
+    if (!user.password) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: 'This account uses Google sign-in. Please use "Continue with Google" instead.',
+        },
+        { status: 401 }
+      )
+    }
+
     // Verify password
     const isPasswordValid = await verifyPassword(body.password, user.password)
 

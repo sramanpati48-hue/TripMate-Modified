@@ -4,6 +4,7 @@ import type React from "react"
 
 import { useState } from "react"
 import Link from "next/link"
+import { signIn } from "next-auth/react"
 import { Navbar } from "@/components/navbar"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -220,7 +221,12 @@ export default function RegisterPage() {
               </span>
             </div>
 
-            <Button variant="outline" className="w-full gap-2 bg-transparent" disabled={isLoading}>
+            <Button
+              variant="outline"
+              className="w-full gap-2 bg-transparent"
+              disabled={isLoading}
+              onClick={() => signIn('google', { callbackUrl: '/profile', redirect: true })}
+            >
               <svg className="h-4 w-4" viewBox="0 0 24 24">
                 <path
                   fill="currentColor"

@@ -4,6 +4,7 @@ import type React from "react"
 
 import { useState } from "react"
 import Link from "next/link"
+import { signIn } from "next-auth/react"
 import { Navbar } from "@/components/navbar"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -61,8 +62,21 @@ export default function LoginPage() {
 
   const handleGoogleLogin = async () => {
     setIsLoading(true)
-    await new Promise((resolve) => setTimeout(resolve, 1000))
-    window.location.href = "/profile"
+    setError("")
+    try {
+      const result = await signIn('google', { 
+        callbackUrl: '/profile',
+        redirect: true 
+      })
+      // If signIn returns (e.g. popup blocked), reset loading
+      if (result?.error) {
+        setError('Failed to sign in with Google: ' + result.error)
+        setIsLoading(false)
+      }
+    } catch (err) {
+      setError('Failed to sign in with Google. Please try again.')
+      setIsLoading(false)
+    }
   }
 
   return (
