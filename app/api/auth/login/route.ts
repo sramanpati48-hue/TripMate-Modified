@@ -44,12 +44,12 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Check if user has a password (OAuth-only users won't)
+    // Check if user has a password
     if (!user.password) {
       return NextResponse.json(
         {
           success: false,
-          message: 'This account uses Google sign-in. Please use "Continue with Google" instead.',
+          message: 'No password set for this account. Please sign up first to set a password.',
         },
         { status: 401 }
       )

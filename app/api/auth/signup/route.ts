@@ -34,29 +34,44 @@ export async function POST(request: NextRequest) {
       where: { email: body.email.toLowerCase() },
     })
 
-    if (existingUser) {
-      return NextResponse.json(
-        {
-          success: false,
-          message: 'User with this email already exists',
-          errors: { email: 'Email already registered' },
-        },
-        { status: 409 }
-      )
-    }
-
     // Hash password
     const hashedPassword = await hashPassword(body.password)
 
-    // Create user in database
-    const user = await prisma.user.create({
-      data: {
-        email: body.email.toLowerCase(),
-        password: hashedPassword,
-        name: body.name.trim(),
-        phone: body.phone?.trim() || null,
-      },
-    })
+    let user;
+
+    if (existingUser) {
+      // If the existing user has no password (e.g. former OAuth account),
+      // allow them to set a password now
+      if (!existingUser.password) {
+        user = await prisma.user.update({
+          where: { id: existingUser.id },
+          data: {
+            password: hashedPassword,
+            name: body.name.trim() || existingUser.name,
+            phone: body.phone?.trim() || existingUser.phone,
+          },
+        })
+      } else {
+        return NextResponse.json(
+          {
+            success: false,
+            message: 'User with this email already exists',
+            errors: { email: 'Email already registered' },
+          },
+          { status: 409 }
+        )
+      }
+    } else {
+      // Create new user in database
+      user = await prisma.user.create({
+        data: {
+          email: body.email.toLowerCase(),
+          password: hashedPassword,
+          name: body.name.trim(),
+          phone: body.phone?.trim() || null,
+        },
+      })
+    }
 
     // Generate JWT token
     const token = await generateToken({
