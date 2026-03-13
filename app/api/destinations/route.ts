@@ -1,33 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { generateDestinationDataWithGroq } from '@/lib/groq-ai'
 import { mockPlaces } from '@/lib/mock-data'
-import { getDestinationImages } from '@/lib/image-service'
 
 export const dynamic = 'force-dynamic'
-
-// Function to enhance places with real-time images
-async function enhancePlacesWithImages(places: any[]) {
-  return Promise.all(places.map(async (place) => {
-    try {
-      // Only use curated mappings here; keep original place images otherwise.
-      const searchText = `${place.name} ${place.location} ${place.state}`
-      const images = await getDestinationImages(searchText, 3, { allowExternalFallback: false })
-      
-      if (images && images.length > 0) {
-        return {
-          ...place,
-          image: images[0].url,
-          images: images.map((img: any) => img.url)
-        }
-      }
-    } catch (error) {
-      console.error(`Error fetching images for ${place.name}:`, error)
-    }
-    
-    // Preserve original data if there is no curated match or any error.
-    return place
-  }))
-}
 
 export async function GET(request: NextRequest) {
   try {
@@ -47,10 +22,9 @@ export async function GET(request: NextRequest) {
         place.category.some(cat => cat.toLowerCase().includes(searchLower))
       )
       
-      // If we found results, enhance with real-time images
+      // If we found results, return curated place data as-is.
       if (filtered.length > 0) {
-        const enhanced = await enhancePlacesWithImages(filtered)
-        return NextResponse.json(enhanced)
+        return NextResponse.json(filtered)
       }
       
       // If no results and realtime is enabled, try AI search
@@ -70,9 +44,8 @@ export async function GET(request: NextRequest) {
       return NextResponse.json([])
     }
 
-    // Enhance mock places with real-time images
-    const enhanced = await enhancePlacesWithImages(mockPlaces)
-    return NextResponse.json(enhanced)
+    // Return curated mock places without runtime image replacement.
+    return NextResponse.json(mockPlaces)
   } catch (error) {
     console.error('Error fetching destinations:', error)
     // Fallback to mock data on error
