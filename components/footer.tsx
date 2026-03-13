@@ -1,7 +1,12 @@
+"use client"
+
 import Link from "next/link"
 import { MapPin } from "lucide-react"
+import { useI18n } from "@/components/language-provider"
 
 export function Footer() {
+  const { t } = useI18n()
+
   return (
     <footer className="border-t bg-secondary/30">
       <div className="container mx-auto px-4 py-12">
@@ -12,61 +17,61 @@ export function Footer() {
               <span className="text-xl font-bold">TRIPMATE</span>
             </Link>
             <p className="text-sm text-muted-foreground">
-              Your smart travel companion for discovering amazing destinations around the world.
+              {t("footer.description")}
             </p>
           </div>
 
           <div className="space-y-4">
-            <h4 className="font-semibold">Explore</h4>
+            <h4 className="font-semibold">{t("footer.explore")}</h4>
             <nav className="flex flex-col gap-2 text-sm text-muted-foreground">
               <Link href="/explore" className="hover:text-primary transition-colors">
-                Destinations
+                {t("footer.destinations")}
               </Link>
               <Link href="/explore?category=food" className="hover:text-primary transition-colors">
-                Food & Dining
+                {t("footer.foodDining")}
               </Link>
               <Link href="/explore?category=events" className="hover:text-primary transition-colors">
-                Events
+                {t("footer.events")}
               </Link>
               <Link href="/explore?category=hotels" className="hover:text-primary transition-colors">
-                Hotels
+                {t("footer.hotels")}
               </Link>
             </nav>
           </div>
 
           <div className="space-y-4">
-            <h4 className="font-semibold">Plan</h4>
+            <h4 className="font-semibold">{t("footer.plan")}</h4>
             <nav className="flex flex-col gap-2 text-sm text-muted-foreground">
               <Link href="/trip-planner" className="hover:text-primary transition-colors">
-                Trip Planner
+                {t("navbar.tripPlanner")}
               </Link>
               <Link href="/map" className="hover:text-primary transition-colors">
-                Map View
+                {t("footer.mapView")}
               </Link>
               <Link href="/trip-planner#ai" className="hover:text-primary transition-colors">
-                AI Itinerary
+                {t("footer.aiItinerary")}
               </Link>
             </nav>
           </div>
 
           <div className="space-y-4">
-            <h4 className="font-semibold">Company</h4>
+            <h4 className="font-semibold">{t("footer.company")}</h4>
             <nav className="flex flex-col gap-2 text-sm text-muted-foreground">
               <Link href="/about" className="hover:text-primary transition-colors">
-                About
+                {t("footer.about")}
               </Link>
               <Link href="/contact" className="hover:text-primary transition-colors">
-                Contact
+                {t("footer.contact")}
               </Link>
               <Link href="/privacy" className="hover:text-primary transition-colors">
-                Privacy Policy
+                {t("footer.privacyPolicy")}
               </Link>
             </nav>
           </div>
         </div>
 
         <div className="mt-12 border-t pt-8 text-center text-sm text-muted-foreground">
-          <p>&copy; {new Date().getFullYear()} TRIPMATE. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} TRIPMATE. {t("footer.rightsReserved")}</p>
         </div>
       </div>
     </footer>

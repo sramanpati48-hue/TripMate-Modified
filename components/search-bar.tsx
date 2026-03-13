@@ -4,16 +4,10 @@ import type React from "react"
 
 import { useState, useRef, useEffect } from "react"
 import { Input } from "@/components/ui/input"
-import { Search, MapPin, Clock, TrendingUp } from "lucide-react"
+import { Search, MapPin, TrendingUp } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { searchDestinations, type IndianDestination } from "@/lib/indian-destinations"
-
-interface SearchSuggestion {
-  id: string
-  name: string
-  type: "destination" | "food" | "event" | "hotel"
-  location?: string
-}
+import { useI18n } from "@/components/language-provider"
 
 const trendingSearches = ["Goa", "Manali", "Jaipur", "Kerala", "Ladakh", "Udaipur"]
 
@@ -31,9 +25,10 @@ export function SearchBar({
   onChange,
   onSearch,
   className,
-  placeholder = "Search destinations in India...",
+  placeholder,
   showSuggestions = true,
 }: SearchBarProps) {
+  const { t } = useI18n()
   const [query, setQuery] = useState(value || "")
   const [isOpen, setIsOpen] = useState(false)
   const [destinations, setDestinations] = useState<IndianDestination[]>([])
@@ -108,7 +103,7 @@ export function SearchBar({
         <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-muted-foreground" />
         <Input
           type="search"
-          placeholder={placeholder}
+          placeholder={placeholder || t("searchbar.placeholder")}
           value={query}
           onChange={handleChange}
           onFocus={() => showSuggestions && setIsOpen(true)}
@@ -122,12 +117,12 @@ export function SearchBar({
           {isSearching ? (
             <div className="p-8 text-center">
               <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-primary border-r-transparent mb-3"></div>
-              <p className="text-muted-foreground">Searching destinations...</p>
+              <p className="text-muted-foreground">{t("searchbar.searching")}</p>
             </div>
           ) : query.length > 0 && destinations.length > 0 ? (
             <div className="p-2">
               <p className="px-3 py-2 text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                {destinations.length} {destinations.length === 1 ? 'Destination' : 'Destinations'} Found
+                {t("searchbar.destinationsFound", { count: destinations.length })}
               </p>
               {destinations.map((dest, index) => (
                 <button
@@ -143,7 +138,7 @@ export function SearchBar({
                     </p>
                     {dest.popularFor && (
                       <p className="text-xs text-muted-foreground/70 truncate">
-                        Popular for: {dest.popularFor}
+                        {t("searchbar.popularFor")}: {dest.popularFor}
                       </p>
                     )}
                   </div>
@@ -153,14 +148,14 @@ export function SearchBar({
           ) : query.length > 0 ? (
             <div className="p-8 text-center">
               <Search className="h-10 w-10 mx-auto text-muted-foreground/50 mb-3" />
-              <p className="text-muted-foreground">No destinations found for "{query}"</p>
-              <p className="text-sm text-muted-foreground/70 mt-1">Try searching for cities, states, or types</p>
+              <p className="text-muted-foreground">{t("searchbar.noDestinationsFor", { query })}</p>
+              <p className="text-sm text-muted-foreground/70 mt-1">{t("searchbar.trySearching")}</p>
             </div>
           ) : (
             <div className="p-2">
               <div>
                 <p className="px-3 py-2 text-xs font-medium text-muted-foreground uppercase tracking-wide flex items-center gap-2">
-                  <TrendingUp className="h-3 w-3" /> Trending Destinations
+                  <TrendingUp className="h-3 w-3" /> {t("searchbar.trendingDestinations")}
                 </p>
                 {trendingSearches.map((search) => (
                   <button

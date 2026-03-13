@@ -1,8 +1,13 @@
+"use client"
+
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Sparkles, ArrowRight } from "lucide-react"
+import { useI18n } from "@/components/language-provider"
 
 export function SeasonalBanner() {
+  const { t } = useI18n()
+
   return (
     <section className="py-16">
       <div className="container mx-auto px-4">
@@ -21,14 +26,14 @@ export function SeasonalBanner() {
                 <Sparkles className="h-6 w-6" />
               </div>
               <div>
-                <h3 className="text-xl md:text-2xl font-bold">Winter Wonderland Collection</h3>
-                <p className="text-primary-foreground/80">Explore magical winter destinations perfect for the season</p>
+                <h3 className="text-xl md:text-2xl font-bold">{t("seasonal.title")}</h3>
+                <p className="text-primary-foreground/80">{t("seasonal.subtitle")}</p>
               </div>
             </div>
 
             <Link href="/explore?season=winter">
               <Button size="lg" variant="secondary" className="gap-2 whitespace-nowrap">
-                Explore Now
+                {t("seasonal.exploreNow")}
                 <ArrowRight className="h-4 w-4" />
               </Button>
             </Link>

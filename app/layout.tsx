@@ -4,6 +4,7 @@ import { DM_Sans, Geist_Mono } from "next/font/google"
 import { Analytics } from "@vercel/analytics/next"
 import { ThemeProvider } from "@/components/theme-provider"
 import { AuthProvider } from "@/components/auth-provider"
+import { LanguageProvider } from "@/components/language-provider"
 import "./globals.css"
 
 const _dmSans = DM_Sans({ subsets: ["latin"] })
@@ -53,7 +54,7 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
           >
-            {children}
+            <LanguageProvider>{children}</LanguageProvider>
           </ThemeProvider>
         </AuthProvider>
         <Analytics />

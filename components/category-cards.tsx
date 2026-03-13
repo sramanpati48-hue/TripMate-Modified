@@ -1,8 +1,11 @@
+"use client"
+
 import Link from "next/link"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Flame, Mountain, Landmark, Trees, Waves, MountainSnow, Plane, Train, Bus, Car } from "lucide-react"
 import { categories as mockCategories } from "@/lib/mock-data"
+import { useI18n } from "@/components/language-provider"
 
 const categoryIcons: Record<string, any> = {
   church: Flame,
@@ -23,15 +26,26 @@ const categoryColors = [
 ]
 
 export function CategoryCards() {
+  const { t } = useI18n()
+
+  const categoryTextMap: Record<string, { labelKey: string; descriptionKey: string }> = {
+    Spiritual: { labelKey: "categories.spiritual", descriptionKey: "categories.spiritualDesc" },
+    Adventure: { labelKey: "categories.adventure", descriptionKey: "categories.adventureDesc" },
+    Heritage: { labelKey: "categories.heritage", descriptionKey: "categories.heritageDesc" },
+    Nature: { labelKey: "categories.nature", descriptionKey: "categories.natureDesc" },
+    Beach: { labelKey: "categories.beach", descriptionKey: "categories.beachDesc" },
+    "Hill Station": { labelKey: "categories.hillStation", descriptionKey: "categories.hillStationDesc" },
+  }
+
   return (
     <section className="py-20 bg-secondary/30">
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
           <h2 className="text-3xl sm:text-4xl font-bold mb-4">
-            Explore by <span className="text-primary">Category</span>
+            {t("categories.heading")}
           </h2>
           <p className="text-muted-foreground max-w-2xl mx-auto text-lg">
-            Discover India through diverse experiences - from spiritual journeys to thrilling adventures
+            {t("categories.subtitle")}
           </p>
         </div>
 
@@ -39,6 +53,7 @@ export function CategoryCards() {
           {mockCategories.map((category, index) => {
             const Icon = categoryIcons[category.icon] || Mountain
             const colorClass = categoryColors[index % categoryColors.length]
+            const categoryText = categoryTextMap[category.name]
 
             return (
               <Link 
@@ -51,9 +66,9 @@ export function CategoryCards() {
                       <Icon className="h-8 w-8" />
                     </div>
                     <div>
-                      <h3 className="font-bold text-lg mb-2">{category.name}</h3>
+                      <h3 className="font-bold text-lg mb-2">{categoryText ? t(categoryText.labelKey) : category.name}</h3>
                       <p className="text-xs text-muted-foreground leading-relaxed">
-                        {category.description}
+                        {categoryText ? t(categoryText.descriptionKey) : category.description}
                       </p>
                     </div>
                   </CardContent>
@@ -71,25 +86,24 @@ export function CategoryCards() {
                 <div>
                   <div className="flex items-center gap-2 mb-3">
                     <Plane className="h-6 w-6 text-primary" />
-                    <h3 className="text-2xl font-bold">Book Your Transport</h3>
+                    <h3 className="text-2xl font-bold">{t("categories.transportTitle")}</h3>
                   </div>
                   <p className="text-muted-foreground mb-6">
-                    Compare fares for flights, trains, and buses. Book cabs for local and outstation trips. 
-                    All in one place with real-time pricing.
+                    {t("categories.transportDescription")}
                   </p>
                   <Link href="/transport">
                     <Button size="lg" className="gap-2">
                       <Plane className="h-5 w-5" />
-                      Book Now
+                      {t("categories.bookNow")}
                     </Button>
                   </Link>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   {[
-                    { icon: Plane, label: "Flights", color: "text-blue-600" },
-                    { icon: Train, label: "Trains", color: "text-green-600" },
-                    { icon: Bus, label: "Buses", color: "text-orange-600" },
-                    { icon: Car, label: "Cabs", color: "text-purple-600" },
+                    { icon: Plane, label: t("categories.flights"), color: "text-blue-600" },
+                    { icon: Train, label: t("categories.trains"), color: "text-green-600" },
+                    { icon: Bus, label: t("categories.buses"), color: "text-orange-600" },
+                    { icon: Car, label: t("categories.cabs"), color: "text-purple-600" },
                   ].map((item) => (
                     <div key={item.label} className="bg-background/80 backdrop-blur-sm rounded-lg p-4 text-center border">
                       <item.icon className={`h-8 w-8 mx-auto mb-2 ${item.color}`} />
