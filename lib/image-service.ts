@@ -184,7 +184,54 @@ const destinationImageMap: { [key: string]: string[] } = {
     "https://images.unsplash.com/photo-1587474260584-136574528ed5?w=1200&h=800&fit=crop",
     "https://images.unsplash.com/photo-1554995347-7d6ff12ec8f7?w=1200&h=800&fit=crop",
     "https://images.unsplash.com/photo-1596176530529-78163a4f7af2?w=1200&h=800&fit=crop"
+  ],
+  "ziro valley": [
+    "https://images.unsplash.com/photo-1509316785289-025f5b846b35?w=1200&h=800&fit=crop",
+    "https://images.unsplash.com/photo-1516026672322-bc52d61a55d5?w=1200&h=800&fit=crop",
+    "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=1200&h=800&fit=crop"
+  ],
+  "mechuka": [
+    "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1200&h=800&fit=crop",
+    "https://images.unsplash.com/photo-1464207687429-7505649dae38?w=1200&h=800&fit=crop",
+    "https://images.unsplash.com/photo-1519904981063-b0cf448d479e?w=1200&h=800&fit=crop"
+  ],
+  "menchukha": [
+    "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1200&h=800&fit=crop",
+    "https://images.unsplash.com/photo-1464207687429-7505649dae38?w=1200&h=800&fit=crop",
+    "https://images.unsplash.com/photo-1519904981063-b0cf448d479e?w=1200&h=800&fit=crop"
+  ],
+  "dong valley": [
+    "https://images.unsplash.com/photo-1495954484750-af469f2f9be5?w=1200&h=800&fit=crop",
+    "https://images.unsplash.com/photo-1473496169904-658ba7c44d8a?w=1200&h=800&fit=crop",
+    "https://images.unsplash.com/photo-1444464666168-49d633b86797?w=1200&h=800&fit=crop"
+  ],
+  "nongriat": [
+    "https://images.unsplash.com/photo-1496372412473-e8548ffd82bc?w=1200&h=800&fit=crop",
+    "https://images.unsplash.com/photo-1511497584788-876760111969?w=1200&h=800&fit=crop",
+    "https://images.unsplash.com/photo-1501594907352-04cda38ebc29?w=1200&h=800&fit=crop"
+  ],
+  "shnongpdeng": [
+    "https://images.unsplash.com/photo-1505142468610-359e7d316be0?w=1200&h=800&fit=crop",
+    "https://images.unsplash.com/photo-1439066615861-d1af74d74000?w=1200&h=800&fit=crop",
+    "https://images.unsplash.com/photo-1503614472-8c93d56e92ce?w=1200&h=800&fit=crop"
+  ],
+  "mawsynram": [
+    "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=1200&h=800&fit=crop",
+    "https://images.unsplash.com/photo-1439853949127-fa647821eba0?w=1200&h=800&fit=crop",
+    "https://images.unsplash.com/photo-1470770903676-69b98201ea1c?w=1200&h=800&fit=crop"
   ]
+}
+
+interface DestinationImageOptions {
+  allowExternalFallback?: boolean
+}
+
+function normalizeDestinationKey(value: string): string {
+  return value
+    .toLowerCase()
+    .replace(/[()\-_,]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
 }
 
 // Pexels API integration for destination images (fallback)
@@ -230,12 +277,19 @@ async function getPexelsImages(query: string, count: number = 3) {
   }
 }
 
-export async function getDestinationImages(query: string, count: number = 3) {
+export async function getDestinationImages(
+  query: string,
+  count: number = 3,
+  options: DestinationImageOptions = {},
+) {
+  const { allowExternalFallback = true } = options
+
   // First, check if we have curated images for this destination
-  const queryLower = query.toLowerCase()
+  const queryLower = normalizeDestinationKey(query)
   
   // Try to match against curated destinations
-  for (const [key, images] of Object.entries(destinationImageMap)) {
+  for (const [rawKey, images] of Object.entries(destinationImageMap)) {
+    const key = normalizeDestinationKey(rawKey)
     if (queryLower.includes(key) || key.includes(queryLower)) {
       console.log(`Using curated images for: ${query}`)
       return images.slice(0, count).map((url, index) => ({
@@ -248,6 +302,11 @@ export async function getDestinationImages(query: string, count: number = 3) {
         alt: query
       }))
     }
+  }
+
+  // In strict mode, do not use external search to avoid irrelevant images.
+  if (!allowExternalFallback) {
+    return []
   }
   
   // Fallback to Pexels API for destinations not in our curated list

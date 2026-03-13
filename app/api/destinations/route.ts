@@ -9,8 +9,9 @@ export const dynamic = 'force-dynamic'
 async function enhancePlacesWithImages(places: any[]) {
   return Promise.all(places.map(async (place) => {
     try {
-      // Fetch fresh images for this destination
-      const images = await getDestinationImages(place.name, 3)
+      // Only use curated mappings here; keep original place images otherwise.
+      const searchText = `${place.name} ${place.location} ${place.state}`
+      const images = await getDestinationImages(searchText, 3, { allowExternalFallback: false })
       
       if (images && images.length > 0) {
         return {
@@ -23,7 +24,7 @@ async function enhancePlacesWithImages(places: any[]) {
       console.error(`Error fetching images for ${place.name}:`, error)
     }
     
-    // Return original place if image fetch fails
+    // Preserve original data if there is no curated match or any error.
     return place
   }))
 }
