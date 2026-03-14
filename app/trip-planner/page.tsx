@@ -173,18 +173,20 @@ export default function TripPlannerPage() {
 
     try {
       const draft = JSON.parse(rawDraft) as Omit<TripActivity, "id">
-      setTrip((prev) =>
-        prev.map((day) => {
-          if (day.day !== 1) return day
-          return {
-            ...day,
-            activities: [...day.activities, { ...draft, id: Date.now().toString() }],
-          }
-        }),
-      )
+      setTrip((prev) => {
+        const lastDay = prev[prev.length - 1]
+        const nextDayNumber = (lastDay?.day || 0) + 1
+        const newDay: TripDay = {
+          day: nextDayNumber,
+          date: `Day ${nextDayNumber}`,
+          activities: [{ ...draft, id: Date.now().toString() }],
+        }
+
+        return [...prev, newDay]
+      })
       draftAppliedRef.current = true
       localStorage.removeItem("tripmate:add-activity-draft")
-      alert("Destination added to Day 1 in your trip planner")
+      alert("New itinerary day created and destination added")
     } catch (error) {
       console.error("Failed to apply trip draft:", error)
     } finally {
