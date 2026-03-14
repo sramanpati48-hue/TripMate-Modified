@@ -1,4 +1,4 @@
-// Real hotel API integration using RapidAPI Booking.com
+// Hotel API integration using Google Places Nearby Search (type=lodging)
 
 export interface HotelData {
   name: string;
@@ -18,38 +18,31 @@ export async function getRealHotels(
   lat: number,
   lng: number
 ): Promise<HotelData[]> {
-  const rapidApiKey = process.env.RAPIDAPI_KEY;
+  const placesApiKey =
+    process.env.GOOGLE_PLACES_API_KEY ||
+    process.env.GOOGLE_MAPS_API_KEY ||
+    process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
 
-  // If no API key, return mock data
-  if (!rapidApiKey || rapidApiKey === 'YOUR_RAPIDAPI_KEY_HERE') {
-    console.log('⚠️ No RapidAPI key configured - Using mock hotel data');
+  // If no Google Places key, return mock data
+  if (!placesApiKey || placesApiKey === 'YOUR_GOOGLE_PLACES_API_KEY_HERE') {
+    console.log('⚠️ No Google Places API key configured - Using mock hotel data');
     return generateMockHotels(location);
   }
 
   try {
-    // Search for hotels using Booking.com API
+    // Search for hotels using Google Places Nearby Search
     const params = new URLSearchParams({
-      latitude: lat.toString(),
-      longitude: lng.toString(),
-      adults_number: '2',
-      checkin_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-      checkout_date: new Date(Date.now() + 8 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-      filter_by_currency: 'INR',
-      locale: 'en-us',
-      room_number: '1',
-      units: 'metric',
-      order_by: 'popularity',
-      page_number: '0'
+      location: `${lat},${lng}`,
+      radius: '5000',
+      type: 'lodging',
+      language: 'en',
+      key: placesApiKey,
     });
-    
-    const searchUrl = `https://booking-com.p.rapidapi.com/v1/hotels/search-by-coordinates?${params}`;
+
+    const searchUrl = `https://maps.googleapis.com/maps/api/place/nearbysearch/json?${params}`;
     
     const response = await fetch(searchUrl, {
-      method: 'GET',
-      headers: {
-        'X-RapidAPI-Key': rapidApiKey,
-        'X-RapidAPI-Host': 'booking-com.p.rapidapi.com'
-      }
+      method: 'GET'
     });
 
     if (!response.ok) {
@@ -57,23 +50,26 @@ export async function getRealHotels(
     }
 
     const data = await response.json();
+    if (data.status && data.status !== 'OK' && data.status !== 'ZERO_RESULTS') {
+      throw new Error(`Google Places error: ${data.status}`);
+    }
     
     // Parse the response and convert to our format
-    if (data.result && Array.isArray(data.result)) {
-      return data.result.slice(0, 8).map((hotel: any) => ({
-        name: hotel.hotel_name || 'Hotel',
-        rating: hotel.review_score ? hotel.review_score / 2 : 4.0, // Convert 10-scale to 5-scale
-        userRatingsTotal: hotel.review_nr || 100,
-        address: hotel.address || location,
-        priceLevel: getPriceLevel(hotel.min_total_price),
-        price: hotel.min_total_price ? Math.round(hotel.min_total_price) : undefined,
-        distance: hotel.distance ? `${hotel.distance} km` : undefined,
+    if (data.results && Array.isArray(data.results)) {
+      return data.results.slice(0, 8).map((hotel: any) => ({
+        name: hotel.name || 'Hotel',
+        rating: hotel.rating || 4.0,
+        userRatingsTotal: hotel.user_ratings_total || 100,
+        address: hotel.vicinity || hotel.formatted_address || location,
+        priceLevel: typeof hotel.price_level === 'number' ? hotel.price_level : 2,
+        price: estimatePriceFromLevel(hotel.price_level),
+        distance: distanceKm(lat, lng, hotel.geometry?.location?.lat || lat, hotel.geometry?.location?.lng || lng),
         coordinates: {
-          lat: hotel.latitude || lat,
-          lng: hotel.longitude || lng
+          lat: hotel.geometry?.location?.lat || lat,
+          lng: hotel.geometry?.location?.lng || lng
         },
-        amenities: hotel.hotel_facilities?.slice(0, 5) || ['Wi-Fi', 'Restaurant'],
-        imageUrl: hotel.max_photo_url || hotel.main_photo_url
+        amenities: inferAmenitiesFromTypes(hotel.types),
+        imageUrl: buildPlacePhotoUrl(hotel.photos, placesApiKey)
       }));
     }
 
@@ -85,12 +81,52 @@ export async function getRealHotels(
   }
 }
 
-function getPriceLevel(price?: number): number {
-  if (!price) return 2;
-  if (price < 2000) return 1;
-  if (price < 5000) return 2;
-  if (price < 10000) return 3;
-  return 4;
+function estimatePriceFromLevel(level?: number): number | undefined {
+  if (typeof level !== 'number') return undefined;
+  const map: Record<number, number> = {
+    0: 900,
+    1: 1500,
+    2: 3000,
+    3: 6500,
+    4: 11000,
+  };
+  return map[level] || 3000;
+}
+
+function distanceKm(fromLat: number, fromLng: number, toLat: number, toLng: number): string {
+  const toRad = (value: number) => (value * Math.PI) / 180;
+  const R = 6371;
+  const dLat = toRad(toLat - fromLat);
+  const dLng = toRad(toLng - fromLng);
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(toRad(fromLat)) * Math.cos(toRad(toLat)) *
+    Math.sin(dLng / 2) * Math.sin(dLng / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  const distance = R * c;
+  return `${distance.toFixed(1)} km`;
+}
+
+function inferAmenitiesFromTypes(types?: string[]): string[] {
+  const base = ['Wi-Fi', 'Front Desk', 'Parking'];
+  if (!types || types.length === 0) return base;
+
+  const inferred = [...base];
+  if (types.includes('spa')) inferred.push('Spa');
+  if (types.includes('restaurant')) inferred.push('Restaurant');
+  if (types.includes('gym')) inferred.push('Gym');
+  return inferred.slice(0, 5);
+}
+
+function buildPlacePhotoUrl(photos: any[] | undefined, key: string): string | undefined {
+  const ref = photos?.[0]?.photo_reference;
+  if (!ref) return undefined;
+  const params = new URLSearchParams({
+    maxwidth: '1200',
+    photo_reference: ref,
+    key,
+  });
+  return `https://maps.googleapis.com/maps/api/place/photo?${params}`;
 }
 
 function generateMockHotels(location: string): HotelData[] {
