@@ -1689,6 +1689,30 @@ const timeToMinutes = (timeStr: string): number => {
   }
 }
 
+const normalizeActivityValue = (value: unknown): string => {
+  return String(value ?? '')
+    .toLowerCase()
+    .replace(/[^a-z0-9\s:]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
+const dedupeDayActivities = (activities: AIActivity[]): AIActivity[] => {
+  const seen = new Set<string>()
+
+  return activities.filter((activity) => {
+    const key = [
+      normalizeActivityValue(activity.time),
+      normalizeActivityValue(activity.name),
+      normalizeActivityValue(activity.location),
+    ].join('|')
+
+    if (!key.replace(/\|/g, '').trim() || seen.has(key)) return false
+    seen.add(key)
+    return true
+  })
+}
+
 // Helper function to group activities by day
 const groupActivitiesByDay = (activities: AIActivity[], daysCount: number) => {
   // If API already provided day-level activities, preserve that grouping.
@@ -1707,7 +1731,7 @@ const groupActivitiesByDay = (activities: AIActivity[], daysCount: number) => {
       .sort(([a], [b]) => a - b)
       .map(([day, dayActivities]) => ({
         day,
-        activities: dayActivities
+        activities: dedupeDayActivities(dayActivities)
           .sort((a, b) => timeToMinutes(a.time) - timeToMinutes(b.time))
           .map((activity) => ({
             ...activity,
@@ -1729,7 +1753,7 @@ const groupActivitiesByDay = (activities: AIActivity[], daysCount: number) => {
   for (let i = 0; i < daysCount; i++) {
     const startIdx = i * activitiesPerDay
     const endIdx = Math.min(startIdx + activitiesPerDay, sortedActivities.length)
-    const dayActivities = sortedActivities.slice(startIdx, endIdx)
+    const dayActivities = dedupeDayActivities(sortedActivities.slice(startIdx, endIdx))
     
     if (dayActivities.length > 0) {
       // Convert times to AM/PM format and ensure chronological order

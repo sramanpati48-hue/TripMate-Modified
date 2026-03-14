@@ -1,14 +1,54 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { generateItineraryWithClaude } from '@/lib/claude-ai'
 import { generateItineraryWithGroq } from '@/lib/groq-ai'
 
 export const dynamic = 'force-dynamic'
 
+function normalizeActivityValue(value: unknown): string {
+  return String(value ?? '')
+    .toLowerCase()
+    .replace(/[^a-z0-9\s:]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+}
+
+function dedupeItineraryActivities(payload: any) {
+  if (!payload || !Array.isArray(payload.itinerary)) return payload
+
+  const dedupedDays = payload.itinerary.map((day: any) => {
+    if (!day || !Array.isArray(day.activities)) return day
+
+    const seen = new Set<string>()
+    const dedupedActivities = day.activities.filter((activity: any) => {
+      const key = [
+        normalizeActivityValue(activity?.time),
+        normalizeActivityValue(activity?.name || activity?.title || activity?.activity),
+        normalizeActivityValue(activity?.location),
+      ].join('|')
+
+      if (!key.replace(/\|/g, '').trim() || seen.has(key)) return false
+      seen.add(key)
+      return true
+    })
+
+    return {
+      ...day,
+      activities: dedupedActivities,
+    }
+  })
+
+  return {
+    ...payload,
+    itinerary: dedupedDays,
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { destination, days, budget } = body
+    const { destination, days, budget, model = 'claude' } = body
 
-    console.log('Itinerary request:', { destination, days, budget })
+    console.log('Itinerary request:', { destination, days, budget, model })
 
     if (!destination || !days || !budget) {
       return NextResponse.json(
@@ -17,9 +57,20 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const itinerary = await generateItineraryWithGroq(destination, days, budget)
+    // Use Groq AI (llama-3.3-70b-versatile) by default - Fast and FREE!
+    let itinerary;
+    if (model === 'claude') {
+      console.log('🤖 Using Claude Haiku 4.5')
+      itinerary = await generateItineraryWithClaude(destination, days, budget)
+    } else {
+      // Default to Groq AI - Fast, free, and powerful!
+      console.log('🤖 Using Groq AI (llama-3.3-70b-versatile) - Default FREE AI')
+      itinerary = await generateItineraryWithGroq(destination, days, budget)
+    }
 
-    return NextResponse.json(itinerary)
+    const sanitizedItinerary = dedupeItineraryActivities(itinerary)
+
+    return NextResponse.json(sanitizedItinerary)
   } catch (error: any) {
     console.error('Error generating itinerary:', error.message)
     console.error('Error stack:', error.stack)
