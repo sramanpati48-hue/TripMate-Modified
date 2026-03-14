@@ -6,7 +6,8 @@ export async function generateItineraryWithGroq(
   budget: string,
   interests?: string
 ): Promise<any> {
-  const API_KEY = process.env.GROQ_API_KEY;
+  const rawApiKey = process.env.GROQ_API_KEY ?? '';
+  const API_KEY = rawApiKey.trim().replace(/^['\"]|['\"]$/g, '');
 
   // Fail fast so callers know real Groq generation is not configured.
   if (!API_KEY || API_KEY === 'YOUR_GROQ_API_KEY_HERE') {
