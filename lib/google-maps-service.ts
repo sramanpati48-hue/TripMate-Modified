@@ -415,8 +415,36 @@ export async function searchNearbyPlaces(
   // Simulate API delay
   await new Promise(resolve => setTimeout(resolve, 500))
   
-  // Return mock data based on place type
-  return mockNearbyPlaces[placeType] || []
+  // Return mock data based on place type, recentered around the requested location
+  // so directions and map markers remain relevant for current-location searches.
+  return rebaseMockPlacesToLocation(mockNearbyPlaces[placeType] || [], location)
+}
+
+function rebaseMockPlacesToLocation(
+  places: NearbyPlace[],
+  target: { lat: number; lng: number }
+): NearbyPlace[] {
+  // Original mock data is centered around Taj Mahal/Agra region.
+  const baseCenter = { lat: 27.1751, lng: 78.0421 }
+  const deltaLat = target.lat - baseCenter.lat
+  const deltaLng = target.lng - baseCenter.lng
+  const isFarFromBase = calculateDistance(target.lat, target.lng, baseCenter.lat, baseCenter.lng) > 25
+
+  return places.map((place, index) => {
+    const shiftedLat = place.location.lat + deltaLat
+    const shiftedLng = place.location.lng + deltaLng
+    const km = calculateDistance(target.lat, target.lng, shiftedLat, shiftedLng)
+
+    return {
+      ...place,
+      id: `${place.id}-${Math.round(target.lat * 1000)}-${Math.round(target.lng * 1000)}-${index}`,
+      location: { lat: shiftedLat, lng: shiftedLng },
+      distance: formatDistance(km),
+      address: isFarFromBase
+        ? `Near selected location (${target.lat.toFixed(4)}, ${target.lng.toFixed(4)})`
+        : place.address,
+    }
+  })
 }
 
 // Get place details
