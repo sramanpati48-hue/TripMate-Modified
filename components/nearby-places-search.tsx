@@ -45,6 +45,17 @@ export function NearbyPlacesSearch({
   onPlacesUpdate,
   initialDestination = ""
 }: NearbyPlacesSearchProps) {
+  const shortCategoryLabels: Record<string, string> = {
+    restaurant: "Restaurants",
+    hotel: "Hotels",
+    cafe: "Cafes",
+    atm: "ATMs",
+    hospital: "Hospitals",
+    gas_station: "Gas",
+    pharmacy: "Pharmacy",
+    tourist_attraction: "Attractions",
+  }
+
   const [searchQuery, setSearchQuery] = useState(initialDestination)
   const [destination, setDestination] = useState<Destination | null>(null)
   const [selectedCategory, setSelectedCategory] = useState<string>("restaurant")
@@ -250,15 +261,17 @@ export function NearbyPlacesSearch({
           </CardHeader>
           <CardContent>
             <Tabs value={selectedCategory} onValueChange={handleCategoryChange}>
-              <TabsList className="grid grid-cols-4 lg:grid-cols-8 gap-2 h-auto">
+              <TabsList className="grid w-full grid-cols-4 md:grid-cols-8 gap-1.5 h-auto p-1">
                 {placeTypes.map((type) => (
                   <TabsTrigger
                     key={type.id}
                     value={type.id}
-                    className="flex flex-col items-center gap-1 py-2"
+                    className="min-w-0 flex flex-col items-center justify-center gap-1 py-2 px-1 text-center"
                   >
                     <span className="text-lg">{type.icon}</span>
-                    <span className="text-xs hidden sm:block">{type.name}</span>
+                    <span className="text-[10px] sm:text-xs leading-tight block max-w-full truncate">
+                      {shortCategoryLabels[type.id] || type.name}
+                    </span>
                   </TabsTrigger>
                 ))}
               </TabsList>
