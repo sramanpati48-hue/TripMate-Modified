@@ -28,6 +28,7 @@ export default function ExplorePage() {
   useEffect(() => {
     const categoryParam = searchParams.get("category")
     const regionParam = searchParams.get("region")
+    const searchParam = searchParams.get("search")
     
     if (categoryParam) {
       // Capitalize each word to match category values (e.g., "hill station" -> "Hill Station")
@@ -45,6 +46,8 @@ export default function ExplorePage() {
         .join(' ')
       setSelectedRegion(capitalizedRegion as Region)
     }
+
+    setSearchQuery(searchParam || "")
   }, [searchParams])
 
   useEffect(() => {

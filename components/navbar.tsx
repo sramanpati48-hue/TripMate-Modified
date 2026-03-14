@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, type KeyboardEvent } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
@@ -18,6 +18,7 @@ export function Navbar() {
   const [user, setUser] = useState<any>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [isMounted, setIsMounted] = useState(false)
+  const [searchQuery, setSearchQuery] = useState("")
   const router = useRouter()
   const { t } = useI18n()
 
@@ -59,6 +60,22 @@ export function Navbar() {
     router.push('/')
   }
 
+  const handleSearch = () => {
+    const trimmed = searchQuery.trim()
+    if (!trimmed) {
+      router.push('/explore')
+      return
+    }
+    router.push(`/explore?search=${encodeURIComponent(trimmed)}`)
+  }
+
+  const handleSearchKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault()
+      handleSearch()
+    }
+  }
+
   const navLinks = [
     { href: "/explore", label: t("navbar.explore"), icon: Compass },
     { href: "/transport", label: t("navbar.transport"), icon: Plane },
@@ -98,6 +115,9 @@ export function Navbar() {
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input 
               placeholder={t("navbar.searchDestinations")}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={handleSearchKeyDown}
               className="pl-10 bg-secondary/30 border-border/50 focus:bg-background" 
             />
           </div>
@@ -175,7 +195,16 @@ export function Navbar() {
                 <div className="flex flex-col gap-6 mt-6">
                   <div className="relative">
                     <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-                    <Input placeholder={t("navbar.search")} className="pl-10" />
+                    <Input
+                      placeholder={t("navbar.search")}
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      onKeyDown={(e) => {
+                        handleSearchKeyDown(e)
+                        if (e.key === 'Enter') setIsOpen(false)
+                      }}
+                      className="pl-10"
+                    />
                   </div>
 
                   <nav className="flex flex-col gap-2">
