@@ -366,7 +366,7 @@ IMPORTANT:
       destinations.map(async (dest: any) => {
         try {
           // Use destination name for more accurate image matching
-          const images = await getDestinationImages(dest.name, 3)
+          const images = await getDestinationImages(dest.name, 3, { allowExternalFallback: false })
           
           if (images && images.length > 0) {
             return {

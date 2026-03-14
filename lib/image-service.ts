@@ -219,6 +219,31 @@ const destinationImageMap: { [key: string]: string[] } = {
     "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=1200&h=800&fit=crop",
     "https://images.unsplash.com/photo-1439853949127-fa647821eba0?w=1200&h=800&fit=crop",
     "https://images.unsplash.com/photo-1470770903676-69b98201ea1c?w=1200&h=800&fit=crop"
+  ],
+  "gir": [
+    "https://images.unsplash.com/photo-1546182990-dffeafbe841d?w=1200&h=800&fit=crop",
+    "https://images.unsplash.com/photo-1474511320723-9a56873867b5?w=1200&h=800&fit=crop",
+    "https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=1200&h=800&fit=crop"
+  ],
+  "gir national park": [
+    "https://images.unsplash.com/photo-1546182990-dffeafbe841d?w=1200&h=800&fit=crop",
+    "https://images.unsplash.com/photo-1474511320723-9a56873867b5?w=1200&h=800&fit=crop",
+    "https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=1200&h=800&fit=crop"
+  ],
+  "girnar": [
+    "https://images.unsplash.com/photo-1519817914152-22f90e2f0f3a?w=1200&h=800&fit=crop",
+    "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=1200&h=800&fit=crop",
+    "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=1200&h=800&fit=crop"
+  ],
+  "girnar hill": [
+    "https://images.unsplash.com/photo-1519817914152-22f90e2f0f3a?w=1200&h=800&fit=crop",
+    "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?w=1200&h=800&fit=crop",
+    "https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=1200&h=800&fit=crop"
+  ],
+  "junagadh": [
+    "https://images.unsplash.com/photo-1477587458883-47145ed94245?w=1200&h=800&fit=crop",
+    "https://images.unsplash.com/photo-1524492412937-b28074a5d7da?w=1200&h=800&fit=crop",
+    "https://images.unsplash.com/photo-1599661046289-e31897846e41?w=1200&h=800&fit=crop"
   ]
 }
 
