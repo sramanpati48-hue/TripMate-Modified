@@ -1,6 +1,7 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useRef, useState } from "react"
+import { useRouter } from "next/navigation"
 import { Navbar } from "@/components/navbar"
 import { Footer } from "@/components/footer"
 import { TripDayCard, type TripActivity } from "@/components/trip-day-card"
@@ -155,6 +156,41 @@ const initialTrip: TripDay[] = [
 export default function TripPlannerPage() {
   const [trip, setTrip] = useState<TripDay[]>(initialTrip)
   const [addingToDay, setAddingToDay] = useState<number | null>(null)
+  const router = useRouter()
+  const draftAppliedRef = useRef(false)
+
+  useEffect(() => {
+    if (draftAppliedRef.current) return
+
+    const params = new URLSearchParams(window.location.search)
+    if (params.get("addFromPlace") !== "1") return
+
+    const rawDraft = localStorage.getItem("tripmate:add-activity-draft")
+    if (!rawDraft) {
+      window.history.replaceState(null, "", "/trip-planner")
+      return
+    }
+
+    try {
+      const draft = JSON.parse(rawDraft) as Omit<TripActivity, "id">
+      setTrip((prev) =>
+        prev.map((day) => {
+          if (day.day !== 1) return day
+          return {
+            ...day,
+            activities: [...day.activities, { ...draft, id: Date.now().toString() }],
+          }
+        }),
+      )
+      draftAppliedRef.current = true
+      localStorage.removeItem("tripmate:add-activity-draft")
+      alert("Destination added to Day 1 in your trip planner")
+    } catch (error) {
+      console.error("Failed to apply trip draft:", error)
+    } finally {
+      window.history.replaceState(null, "", "/trip-planner")
+    }
+  }, [router])
 
   // Get previous location for transport calculation
   const getPreviousLocation = (dayNum: number) => {

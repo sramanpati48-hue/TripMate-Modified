@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -46,6 +47,7 @@ export function PlaceDetailsDialog({ place, open, onOpenChange }: PlaceDetailsDi
   const [isBookmarked, setIsBookmarked] = useState(false)
   const [hotels, setHotels] = useState<Hotel[]>([])
   const [hotelsLoading, setHotelsLoading] = useState(false)
+  const router = useRouter()
 
   // Reset image index when place changes
   useEffect(() => {
@@ -171,6 +173,21 @@ export function PlaceDetailsDialog({ place, open, onOpenChange }: PlaceDetailsDi
 
   const prevImage = () => {
     setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length)
+  }
+
+  const handleAddToTrip = () => {
+    const draftActivity = {
+      name: `Visit ${place.name}`,
+      time: "09:00",
+      duration: place.duration || "2-3 hours",
+      location: `${place.location}, ${place.state}`,
+      category: Array.isArray(place.category) && place.category.length > 0 ? place.category[0] : "Sightseeing",
+      notes: place.shortDescription || place.description,
+    }
+
+    localStorage.setItem("tripmate:add-activity-draft", JSON.stringify(draftActivity))
+    onOpenChange(false)
+    router.push("/trip-planner?addFromPlace=1")
   }
 
   return (
@@ -443,7 +460,7 @@ export function PlaceDetailsDialog({ place, open, onOpenChange }: PlaceDetailsDi
                 <Share2 className="h-4 w-4" />
                 Share
               </Button>
-              <Button className="flex-1 gap-2">
+              <Button className="flex-1 gap-2" onClick={handleAddToTrip}>
                 <Plus className="h-4 w-4" />
                 Add to Trip
               </Button>
