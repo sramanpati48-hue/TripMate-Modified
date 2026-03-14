@@ -1839,7 +1839,7 @@ export function AIItineraryGenerator() {
     try {
       console.log('Generating itinerary for:', destination)
       
-      // Call Gemini API for any Indian destination
+      // Call itinerary API (Groq default)
       const response = await fetch('/api/itinerary', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -1847,7 +1847,8 @@ export function AIItineraryGenerator() {
           destination,
           days: parseInt(duration),
           budget,
-          interests
+          interests,
+          model: 'groq'
         })
       })
       

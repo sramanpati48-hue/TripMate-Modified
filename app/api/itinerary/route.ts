@@ -46,9 +46,9 @@ function dedupeItineraryActivities(payload: any) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
-    const { destination, days, budget, model = 'claude' } = body
+    const { destination, days, budget, interests = '', model = 'groq' } = body
 
-    console.log('Itinerary request:', { destination, days, budget, model })
+    console.log('Itinerary request:', { destination, days, budget, interests, model })
 
     if (!destination || !days || !budget) {
       return NextResponse.json(
@@ -57,15 +57,14 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Use Groq AI (llama-3.3-70b-versatile) by default - Fast and FREE!
+    // Use Groq AI (llama-3.3-70b-versatile) by default.
     let itinerary;
     if (model === 'claude') {
       console.log('🤖 Using Claude Haiku 4.5')
       itinerary = await generateItineraryWithClaude(destination, days, budget)
     } else {
-      // Default to Groq AI - Fast, free, and powerful!
-      console.log('🤖 Using Groq AI (llama-3.3-70b-versatile) - Default FREE AI')
-      itinerary = await generateItineraryWithGroq(destination, days, budget)
+      console.log('🤖 Using Groq AI (llama-3.3-70b-versatile) - Default')
+      itinerary = await generateItineraryWithGroq(destination, days, budget, interests)
     }
 
     const sanitizedItinerary = dedupeItineraryActivities(itinerary)

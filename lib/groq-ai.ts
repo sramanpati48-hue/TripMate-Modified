@@ -3,19 +3,31 @@
 export async function generateItineraryWithGroq(
   destination: string,
   days: number,
-  budget: string
+  budget: string,
+  interests?: string
 ): Promise<any> {
   const API_KEY = process.env.GROQ_API_KEY;
 
-  // If no API key, return mock itinerary
+  // Fail fast so callers know real Groq generation is not configured.
   if (!API_KEY || API_KEY === 'YOUR_GROQ_API_KEY_HERE') {
-    console.log('⚠️ No Groq API key configured - Using mock itinerary data');
-    return generateMockItinerary(destination, days, budget);
+    throw new Error('GROQ_API_KEY is missing or invalid');
   }
 
+  const interestsText = (interests || '').trim()
+  const interestsLine = interestsText
+    ? `Traveler interests/preferences: ${interestsText}.`
+    : 'Traveler interests/preferences: balanced mix of culture, food, nature, and local experiences.'
+
   const prompt = `Generate a detailed ${days}-day travel itinerary for ${destination}, India with a ${budget} budget.
+${interestsLine}
 
 Create a full day schedule from morning (6-7 AM) to evening (8-9 PM) with 5-7 activities per day.
+
+Hard constraints:
+- Activities must be specific to ${destination} and nearby real places.
+- Avoid generic placeholders like "City Center", "Viewpoint", "Main Temple", "Local Bazaar", or "Fort/Palace".
+- Include concrete place names for each activity location.
+- Keep activity sequence geographically sensible.
 
 Return a JSON object with this exact structure:
 {
@@ -140,8 +152,7 @@ Only return valid JSON without markdown formatting.`;
     return JSON.parse(jsonText);
   } catch (error) {
     console.error('Error generating itinerary with Groq:', error);
-    console.log('📋 Falling back to mock itinerary data');
-    return generateMockItinerary(destination, days, budget);
+    throw error;
   }
 }
 
