@@ -365,8 +365,11 @@ IMPORTANT:
     const destinationsWithImages = await Promise.all(
       destinations.map(async (dest: any) => {
         try {
-          // Use destination name for more accurate image matching
-          const images = await getDestinationImages(dest.name, 3, { allowExternalFallback: false })
+          // Match against richer text to improve curated destination hits.
+          const imageQuery = [dest.name, dest.location, dest.state]
+            .filter(Boolean)
+            .join(' ')
+          const images = await getDestinationImages(imageQuery, 3, { allowExternalFallback: false })
           
           if (images && images.length > 0) {
             return {
@@ -379,11 +382,11 @@ IMPORTANT:
           console.error(`Error fetching images for ${dest.name}:`, error)
         }
         
-        // Fallback to high-quality generic India tourism images
+        // Safe India-focused fallback images (no external random results)
         const fallbackImages = [
           'https://images.unsplash.com/photo-1524492412937-b28074a5d7da?w=1200&h=800&fit=crop',
-          'https://images.unsplash.com/photo-1587474260584-136574528ed5?w=1200&h=800&fit=crop',
-          'https://images.unsplash.com/photo-1548013146-72479768bada?w=1200&h=800&fit=crop'
+          'https://images.unsplash.com/photo-1548013146-72479768bada?w=1200&h=800&fit=crop',
+          'https://images.unsplash.com/photo-1564507592333-c60657eea523?w=1200&h=800&fit=crop'
         ]
         
         return {
