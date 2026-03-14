@@ -3,6 +3,7 @@ import { generateItineraryWithClaude } from '@/lib/claude-ai'
 import { generateItineraryWithGroq } from '@/lib/groq-ai'
 
 export const dynamic = 'force-dynamic'
+const API_BUILD = 'groq-default-v3'
 
 function normalizeActivityValue(value: unknown): string {
   return String(value ?? '')
@@ -69,7 +70,13 @@ export async function POST(request: NextRequest) {
 
     const sanitizedItinerary = dedupeItineraryActivities(itinerary)
 
-    return NextResponse.json(sanitizedItinerary)
+    return NextResponse.json({
+      ...sanitizedItinerary,
+      _meta: {
+        provider: model === 'claude' ? 'claude' : 'groq',
+        build: API_BUILD,
+      },
+    })
   } catch (error: any) {
     console.error('Error generating itinerary:', error.message)
     console.error('Error stack:', error.stack)
