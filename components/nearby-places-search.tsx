@@ -51,6 +51,7 @@ export function NearbyPlacesSearch({
   const [places, setPlaces] = useState<NearbyPlace[]>([])
   const [selectedPlace, setSelectedPlace] = useState<NearbyPlace | null>(null)
   const [isSearching, setIsSearching] = useState(false)
+  const [isLocating, setIsLocating] = useState(false)
   const [isLoadingPlaces, setIsLoadingPlaces] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -84,6 +85,46 @@ export function NearbyPlacesSearch({
     } finally {
       setIsSearching(false)
     }
+  }
+
+  // Use browser current location and load nearby places instantly
+  const handleUseCurrentLocation = async () => {
+    if (typeof navigator === "undefined" || !navigator.geolocation) {
+      setError("Geolocation is not supported in this browser")
+      return
+    }
+
+    setIsLocating(true)
+    setError(null)
+
+    navigator.geolocation.getCurrentPosition(
+      async (position) => {
+        const currentDestination: Destination = {
+          name: "Current Location",
+          address: "Using your device location",
+          location: {
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+          },
+        }
+
+        setDestination(currentDestination)
+        onLocationSelect?.(currentDestination)
+
+        await loadNearbyPlaces(currentDestination.location, selectedCategory)
+        setIsLocating(false)
+      },
+      (geoError) => {
+        console.error("Geolocation error:", geoError)
+        setError("Unable to fetch current location. Please allow location access.")
+        setIsLocating(false)
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 60000,
+      }
+    )
   }
 
   // Load nearby places for a category
@@ -157,6 +198,26 @@ export function NearbyPlacesSearch({
               )}
             </Button>
           </div>
+
+          <Button
+            type="button"
+            variant="outline"
+            className="mt-2 w-full"
+            onClick={handleUseCurrentLocation}
+            disabled={isLocating}
+          >
+            {isLocating ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                Fetching current location...
+              </>
+            ) : (
+              <>
+                <Navigation className="h-4 w-4 mr-2" />
+                Use Current Location
+              </>
+            )}
+          </Button>
 
           {error && (
             <div className="mt-2 text-sm text-red-500 flex items-center gap-1">
