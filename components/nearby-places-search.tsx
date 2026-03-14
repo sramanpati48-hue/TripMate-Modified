@@ -35,12 +35,14 @@ import {
 interface NearbyPlacesSearchProps {
   onLocationSelect?: (destination: Destination) => void
   onPlaceSelect?: (place: NearbyPlace) => void
+  onPlacesUpdate?: (places: NearbyPlace[]) => void
   initialDestination?: string
 }
 
 export function NearbyPlacesSearch({
   onLocationSelect,
   onPlaceSelect,
+  onPlacesUpdate,
   initialDestination = ""
 }: NearbyPlacesSearchProps) {
   const [searchQuery, setSearchQuery] = useState(initialDestination)
@@ -97,14 +99,18 @@ export function NearbyPlacesSearch({
 
     setIsLoadingPlaces(true)
     setPlaces([])
+    onPlacesUpdate?.([])
     setSelectedPlace(null)
 
     try {
       const results = await searchNearbyPlaces(location, category)
-      setPlaces(results || [])
+      const safeResults = results || []
+      setPlaces(safeResults)
+      onPlacesUpdate?.(safeResults)
     } catch (err) {
       console.error("Failed to load places:", err)
       setPlaces([])
+      onPlacesUpdate?.([])
     } finally {
       setIsLoadingPlaces(false)
     }

@@ -321,6 +321,26 @@ export async function geocodeDestination(destinationName: string): Promise<Desti
       address: 'Jaipur, Rajasthan',
       location: { lat: 26.9124, lng: 75.7873 }
     },
+    'rajasthan': {
+      name: 'Rajasthan',
+      address: 'Rajasthan, India',
+      location: { lat: 27.0238, lng: 74.2179 }
+    },
+    'udaipur': {
+      name: 'Udaipur',
+      address: 'Udaipur, Rajasthan',
+      location: { lat: 24.5854, lng: 73.7125 }
+    },
+    'jodhpur': {
+      name: 'Jodhpur',
+      address: 'Jodhpur, Rajasthan',
+      location: { lat: 26.2389, lng: 73.0243 }
+    },
+    'delhi': {
+      name: 'New Delhi',
+      address: 'New Delhi, Delhi',
+      location: { lat: 28.6139, lng: 77.2090 }
+    },
     'goa': {
       name: 'Goa',
       address: 'Goa, India',
@@ -368,6 +388,14 @@ export async function geocodeDestination(destinationName: string): Promise<Desti
   // Check partial matches
   for (const key in destinations) {
     if (key.includes(normalizedQuery) || normalizedQuery.includes(key)) {
+      return destinations[key]
+    }
+  }
+
+  // Fuzzy token matching for broad queries like "rajasthan trip"
+  const queryTokens = normalizedQuery.split(/\s+/).filter(Boolean)
+  for (const key in destinations) {
+    if (queryTokens.some((token) => key.includes(token) || token.includes(key))) {
       return destinations[key]
     }
   }

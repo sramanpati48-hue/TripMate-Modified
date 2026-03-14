@@ -16,6 +16,7 @@ export default function MapPage() {
   const [selectedPlace, setSelectedPlace] = useState<Place | null>(null)
   const [detailsPlace, setDetailsPlace] = useState<Place | null>(null)
   const [searchDestination, setSearchDestination] = useState<Destination | null>(null)
+  const [nearbyPlaces, setNearbyPlaces] = useState<NearbyPlace[]>([])
   const [selectedNearbyPlace, setSelectedNearbyPlace] = useState<NearbyPlace | null>(null)
   const [isSearchOpen, setIsSearchOpen] = useState(false)
 
@@ -32,7 +33,7 @@ export default function MapPage() {
           <InteractiveMap 
             selectedId={selectedPlace?.id}
             searchDestination={searchDestination}
-            nearbyPlaces={selectedNearbyPlace ? [selectedNearbyPlace] : []}
+            nearbyPlaces={selectedNearbyPlace ? [selectedNearbyPlace] : nearbyPlaces}
           />
           
           {/* Floating Search Button */}
@@ -57,9 +58,13 @@ export default function MapPage() {
                 <NearbyPlacesSearch
                   onLocationSelect={(dest) => {
                     setSearchDestination(dest)
+                    setSelectedNearbyPlace(null)
                   }}
                   onPlaceSelect={(place) => {
                     setSelectedNearbyPlace(place)
+                  }}
+                  onPlacesUpdate={(places) => {
+                    setNearbyPlaces(places)
                   }}
                 />
               </div>
