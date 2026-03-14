@@ -8,6 +8,7 @@ import { getTransportModeName } from "@/lib/transport-service"
 
 export interface AIActivity {
   id: string
+  day?: number
   time: string
   name: string
   description: string

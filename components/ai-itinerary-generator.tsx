@@ -1691,6 +1691,31 @@ const timeToMinutes = (timeStr: string): number => {
 
 // Helper function to group activities by day
 const groupActivitiesByDay = (activities: AIActivity[], daysCount: number) => {
+  // If API already provided day-level activities, preserve that grouping.
+  const hasDayMetadata = activities.some((activity) => typeof activity.day === 'number')
+
+  if (hasDayMetadata) {
+    const dayMap = new Map<number, AIActivity[]>()
+
+    activities.forEach((activity) => {
+      const dayNumber = typeof activity.day === 'number' ? activity.day : 1
+      if (!dayMap.has(dayNumber)) dayMap.set(dayNumber, [])
+      dayMap.get(dayNumber)!.push(activity)
+    })
+
+    return Array.from(dayMap.entries())
+      .sort(([a], [b]) => a - b)
+      .map(([day, dayActivities]) => ({
+        day,
+        activities: dayActivities
+          .sort((a, b) => timeToMinutes(a.time) - timeToMinutes(b.time))
+          .map((activity) => ({
+            ...activity,
+            time: convertTo12Hour(activity.time)
+          }))
+      }))
+  }
+
   // First, sort activities by time (morning to night) using the robust time parser
   const sortedActivities = [...activities].sort((a, b) => {
     const timeA = timeToMinutes(a.time)
@@ -1831,9 +1856,21 @@ export function AIItineraryGenerator() {
       if (Array.isArray(daysData) && daysData.length > 0) {
         const activities: AIActivity[] = []
         daysData.forEach((day: any, dayIndex: number) => {
+          const seenInDay = new Set<string>()
+
           day.activities?.forEach((activity: any, actIndex: number) => {
+            const normalizedTime = String(activity.time || '09:00').trim().toLowerCase()
+            const normalizedName = String(activity.name || activity.title || activity.activity || '').trim().toLowerCase()
+            const normalizedLocation = String(activity.location || destination).trim().toLowerCase()
+            const dedupeKey = `${normalizedTime}|${normalizedName}|${normalizedLocation}`
+
+            // Guard against repeated AI items with identical time/name/location in the same day.
+            if (!normalizedName || seenInDay.has(dedupeKey)) return
+            seenInDay.add(dedupeKey)
+
             activities.push({
               id: `${dayIndex}-${actIndex}`,
+              day: day.day || dayIndex + 1,
               time: activity.time || '09:00',
               name: activity.name || activity.title || activity.activity,
               description: activity.description,
