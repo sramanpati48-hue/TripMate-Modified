@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { generateItineraryWithClaude } from '@/lib/claude-ai'
 import { generateItineraryWithGroq } from '@/lib/groq-ai'
 
 export const dynamic = 'force-dynamic'
@@ -58,22 +57,20 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Use Groq AI (llama-3.3-70b-versatile) by default.
-    let itinerary;
+    // Groq is the only deployed itinerary provider.
     if (model === 'claude') {
-      console.log('🤖 Using Claude Haiku 4.5')
-      itinerary = await generateItineraryWithClaude(destination, days, budget)
-    } else {
-      console.log('🤖 Using Groq AI (llama-3.3-70b-versatile) - Default')
-      itinerary = await generateItineraryWithGroq(destination, days, budget, interests)
+      console.log('⚠️ Claude requested but unavailable in deployment. Falling back to Groq.')
     }
+
+    console.log('🤖 Using Groq AI (llama-3.3-70b-versatile) - Default')
+    const itinerary = await generateItineraryWithGroq(destination, days, budget, interests)
 
     const sanitizedItinerary = dedupeItineraryActivities(itinerary)
 
     return NextResponse.json({
       ...sanitizedItinerary,
       _meta: {
-        provider: model === 'claude' ? 'claude' : 'groq',
+        provider: 'groq',
         build: API_BUILD,
       },
     })
