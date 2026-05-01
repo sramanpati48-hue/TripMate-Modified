@@ -9,12 +9,20 @@ import { calculateFare, estimateDistance, formatFare, type TransportFare } from 
 import { geocodeDestination, searchNearbyPlaces } from "@/lib/google-maps-service"
 import { buildProviderUrl } from "@/lib/ride-links"
 import { Clock, MapPin, Navigation } from "lucide-react"
-                          <a rel="noreferrer" target="_blank" href={buildProviderUrl(opt.mode, pickupCoords, null, pickupLocation, dropLocation)} className="text-sm text-blue-600 hover:underline">Book on provider</a>
+
+export default function CabBookingStandalone() {
+  const [pickupLocation, setPickupLocation] = useState("")
+  const [dropLocation, setDropLocation] = useState("")
+  const [useCurrentLocation, setUseCurrentLocation] = useState(false)
+  const [booking, setBooking] = useState<{ id: string; mode: string; eta: number; fare: number } | null>(null)
+
   const [pickupCoords, setPickupCoords] = useState<{lat:number;lng:number}|null>(null)
   const [suggestions, setSuggestions] = useState<Array<any>>([])
   const [loadingSuggestions, setLoadingSuggestions] = useState(false)
   const [liveTime, setLiveTime] = useState<string | null>(null)
   const refreshRef = useRef<number | null>(null)
+
+  const cabModes = ["uber-go", "ola-mini", "taxi", "uber-premier"] as const
 
   const displayPickup = useCurrentLocation ? "📍 Current Location" : pickupLocation
   const distance = useMemo(() => estimateDistance(pickupLocation || "", dropLocation || ""), [pickupLocation, dropLocation])
