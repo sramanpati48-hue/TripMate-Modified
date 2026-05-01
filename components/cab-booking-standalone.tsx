@@ -6,16 +6,10 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { calculateFare, estimateDistance, formatFare, type TransportFare } from "@/lib/transport-service"
-import { geocodeDestination, searchNearbyPlaces, getDirectionsUrl } from "@/lib/google-maps-service"
+import { geocodeDestination, searchNearbyPlaces } from "@/lib/google-maps-service"
+import { buildProviderUrl } from "@/lib/ride-links"
 import { Clock, MapPin, Navigation } from "lucide-react"
-
-const cabModes = ["uber-go", "ola-mini", "taxi", "uber-premier"] as const
-
-export default function CabBookingStandalone() {
-  const [pickupLocation, setPickupLocation] = useState("")
-  const [dropLocation, setDropLocation] = useState("")
-  const [useCurrentLocation, setUseCurrentLocation] = useState(false)
-  const [booking, setBooking] = useState<{ id: string; mode: string; eta: number; fare: number } | null>(null)
+                          <a rel="noreferrer" target="_blank" href={buildProviderUrl(opt.mode, pickupCoords, null, pickupLocation, dropLocation)} className="text-sm text-blue-600 hover:underline">Book on provider</a>
   const [pickupCoords, setPickupCoords] = useState<{lat:number;lng:number}|null>(null)
   const [suggestions, setSuggestions] = useState<Array<any>>([])
   const [loadingSuggestions, setLoadingSuggestions] = useState(false)

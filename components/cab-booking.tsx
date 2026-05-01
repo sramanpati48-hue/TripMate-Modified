@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { calculateFare, estimateDistance, formatFare, type TransportFare } from "@/lib/transport-service"
 import { geocodeDestination, searchNearbyPlaces } from "@/lib/google-maps-service"
+import { buildProviderUrl } from "@/lib/ride-links"
 import { Clock, MapPin, Navigation } from "lucide-react"
 
 interface CabBookingProps {
@@ -173,7 +174,10 @@ export default function CabBooking({ from = "", to = "", passengers = 1 }: CabBo
                       <Clock className="h-4 w-4" />
                       ETA: 2–10 min
                     </div>
-                    <Button size="sm" onClick={() => handleBook(opt)}>Book</Button>
+                    <div className="flex items-center gap-2">
+                      <a rel="noreferrer" target="_blank" href={buildProviderUrl(opt.mode, pickupCoords, null, pickupLocation, dropLocation)} className="text-sm text-blue-600 hover:underline">Open provider</a>
+                      <Button size="sm" onClick={() => handleBook(opt)}>Book</Button>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
