@@ -47,55 +47,55 @@ export function TripSummary({ days }: TripSummaryProps) {
   }
 
   return (
-    <Card className="bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
+    <Card className="border border-white/15 bg-white/5 text-slate-900 shadow-lg shadow-orange-100/10 backdrop-blur-md">
+      <CardHeader className="border-b border-white/15 pb-4">
+        <CardTitle className="flex items-center gap-2 text-slate-900">
           <Activity className="h-5 w-5" />
           Trip Summary
         </CardTitle>
       </CardHeader>
-      <CardContent>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <CardContent className="pt-6">
+        <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
           <div className="space-y-1">
-            <p className="text-sm text-muted-foreground flex items-center gap-1">
+            <p className="flex items-center gap-1 text-sm text-slate-700">
               <Calendar className="h-3.5 w-3.5" />
               Total Days
             </p>
-            <p className="text-2xl font-bold">{days.length}</p>
+            <p className="text-2xl font-bold text-slate-950">{days.length}</p>
           </div>
 
           <div className="space-y-1">
-            <p className="text-sm text-muted-foreground flex items-center gap-1">
+            <p className="flex items-center gap-1 text-sm text-slate-700">
               <Activity className="h-3.5 w-3.5" />
               Activities
             </p>
-            <p className="text-2xl font-bold">{totalActivities}</p>
+            <p className="text-2xl font-bold text-slate-950">{totalActivities}</p>
           </div>
 
           <div className="space-y-1">
-            <p className="text-sm text-muted-foreground flex items-center gap-1">
+            <p className="flex items-center gap-1 text-sm text-slate-700">
               <Car className="h-3.5 w-3.5" />
               Transport Rides
             </p>
-            <p className="text-2xl font-bold">{transportCount}</p>
+            <p className="text-2xl font-bold text-slate-950">{transportCount}</p>
           </div>
 
           <div className="space-y-1">
-            <p className="text-sm text-muted-foreground flex items-center gap-1">
+            <p className="flex items-center gap-1 text-sm text-slate-700">
               <IndianRupee className="h-3.5 w-3.5" />
               Transport Cost
             </p>
-            <p className="text-2xl font-bold text-primary">
+            <p className="text-2xl font-bold text-orange-700">
               ₹{totalTransportCost.toLocaleString('en-IN')}
             </p>
           </div>
         </div>
 
         {mostUsedTransport && (
-          <div className="mt-4 pt-4 border-t">
+          <div className="mt-4 border-t border-white/20 pt-4">
             <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">Most Used Transport:</span>
-              <Badge variant="secondary" className="gap-1">
+              <span className="text-sm text-slate-700">Most Used Transport:</span>
+              <Badge variant="secondary" className="gap-1 border border-white/15 bg-white/35 text-slate-900 hover:bg-white/35">
                 <Car className="h-3 w-3" />
                 {mostUsedTransport.split('-').map(word => 
                   word.charAt(0).toUpperCase() + word.slice(1)
@@ -105,8 +105,8 @@ export function TripSummary({ days }: TripSummaryProps) {
           </div>
         )}
 
-        <div className="mt-3 p-3 bg-background/50 rounded-md">
-          <p className="text-xs text-muted-foreground">
+        <div className="mt-4 rounded-2xl border border-white/15 bg-white/10 p-4">
+          <p className="text-xs text-slate-700">
             💡 <strong>Tip:</strong> Transport fares include real-time surge pricing based on time of day, 
             day of week, and holidays. Book in advance during peak hours to save up to 40%.
           </p>

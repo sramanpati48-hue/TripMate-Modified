@@ -85,23 +85,23 @@ export function Navbar() {
   ]
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/80 shadow-sm">
-      <div className="container mx-auto flex h-16 items-center justify-between px-4">
+    <header className="sticky top-0 z-50 w-full border-b border-white/10 bg-[#0b1220]/85 shadow-sm backdrop-blur-xl supports-[backdrop-filter]:bg-[#0b1220]/75">
+      <div className="container mx-auto flex h-16 items-center justify-between px-4 text-white">
         <div className="flex items-center gap-6">
           <Link href="/" className="flex items-center gap-2 group">
-            <div className="bg-gradient-to-br from-primary to-accent p-2 rounded-lg group-hover:scale-110 transition-transform">
+            <div className="rounded-lg bg-gradient-to-br from-orange-500 to-emerald-400 p-2 transition-transform group-hover:scale-110">
               <MapPin className="h-5 w-5 text-primary-foreground" />
             </div>
             <div className="flex flex-col">
-              <span className="text-lg font-bold text-foreground">TRIPMATE</span>
-              <span className="text-xs text-muted-foreground -mt-1">{t("navbar.tagline")}</span>
+              <span className="text-lg font-bold text-white">TRIPMATE</span>
+              <span className="-mt-1 text-xs text-white/60">{t("navbar.tagline")}</span>
             </div>
           </Link>
 
           <nav className="hidden md:flex items-center gap-1">
             {navLinks.map((link) => (
               <Link key={link.href} href={link.href}>
-                <Button variant="ghost" size="sm" className="gap-2 hover:bg-primary/10 hover:text-primary">
+                <Button variant="ghost" size="sm" className="gap-2 text-white hover:bg-white/10 hover:text-white">
                   <link.icon className="h-4 w-4" />
                   {link.label}
                 </Button>
@@ -112,13 +112,13 @@ export function Navbar() {
 
         <div className="hidden md:flex flex-1 max-w-md mx-6">
           <div className="relative w-full">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/45" />
             <Input 
               placeholder={t("navbar.searchDestinations")}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               onKeyDown={handleSearchKeyDown}
-              className="pl-10 bg-secondary/30 border-border/50 focus:bg-background" 
+              className="border-white/10 bg-white/5 pl-10 text-white placeholder:text-white/45 focus:bg-white/10 focus:ring-orange-500/30" 
             />
           </div>
         </div>
@@ -138,18 +138,18 @@ export function Navbar() {
             ) : user ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="relative h-9 w-9 rounded-full">
+                  <Button variant="ghost" className="relative h-9 w-9 rounded-full hover:bg-white/10">
                     <Avatar className="h-9 w-9">
                       <AvatarImage src={user.avatar || "/placeholder.svg"} alt={user.name} />
                       <AvatarFallback>{user.name?.charAt(0).toUpperCase() || "U"}</AvatarFallback>
                     </Avatar>
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56" align="end">
+                <DropdownMenuContent className="w-56 border-white/10 bg-[#0f1726] text-white shadow-2xl" align="end">
                   <DropdownMenuLabel>
                     <div className="flex flex-col space-y-1">
                       <p className="text-sm font-medium leading-none">{user.name}</p>
-                      <p className="text-xs leading-none text-muted-foreground">{user.email}</p>
+                      <p className="text-xs leading-none text-white/60">{user.email}</p>
                     </div>
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
@@ -190,11 +190,11 @@ export function Navbar() {
                   <span className="sr-only">{t("navbar.toggleMenu")}</span>
                 </Button>
               </SheetTrigger>
-              <SheetContent side="right" className="w-[300px] sm:w-[400px]">
+              <SheetContent side="right" className="w-[300px] border-white/10 bg-[#0b1220] text-white sm:w-[400px]">
                 <SheetTitle className="sr-only">{t("navbar.navigationMenu")}</SheetTitle>
                 <div className="flex flex-col gap-6 mt-6">
                   <div className="relative">
-                    <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                    <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/45" />
                     <Input
                       placeholder={t("navbar.search")}
                       value={searchQuery}
@@ -203,14 +203,14 @@ export function Navbar() {
                         handleSearchKeyDown(e)
                         if (e.key === 'Enter') setIsOpen(false)
                       }}
-                      className="pl-10"
+                      className="border-white/10 bg-white/5 pl-10 text-white placeholder:text-white/45"
                     />
                   </div>
 
                   <nav className="flex flex-col gap-2">
                     {navLinks.map((link) => (
                       <Link key={link.href} href={link.href} onClick={() => setIsOpen(false)}>
-                        <Button variant="ghost" className="w-full justify-start gap-3">
+                        <Button variant="ghost" className="w-full justify-start gap-3 text-white hover:bg-white/10">
                           <link.icon className="h-5 w-5" />
                           {link.label}
                         </Button>
@@ -223,25 +223,25 @@ export function Navbar() {
                   <div className="border-t pt-4">
                     {user ? (
                       <div className="space-y-2">
-                        <div className="flex items-center gap-3 px-2 py-2 rounded-lg bg-secondary/50">
+                        <div className="flex items-center gap-3 rounded-lg bg-white/5 px-2 py-2">
                           <Avatar className="h-10 w-10">
                             <AvatarImage src={user.avatar || "/placeholder.svg"} alt={user.name} />
                             <AvatarFallback>{user.name?.charAt(0).toUpperCase() || "U"}</AvatarFallback>
                           </Avatar>
                           <div className="flex-1 overflow-hidden">
                             <p className="text-sm font-medium truncate">{user.name}</p>
-                            <p className="text-xs text-muted-foreground truncate">{user.email}</p>
+                            <p className="text-xs text-white/60 truncate">{user.email}</p>
                           </div>
                         </div>
                         <Link href="/profile" onClick={() => setIsOpen(false)}>
-                          <Button variant="outline" className="w-full gap-2 justify-start">
+                          <Button variant="outline" className="w-full justify-start gap-2 border-white/10 bg-white/5 text-white hover:bg-white/10 hover:text-white">
                             <User className="h-4 w-4" />
                             {t("navbar.profile")}
                           </Button>
                         </Link>
                         <Button
                           variant="outline"
-                          className="w-full gap-2 justify-start text-destructive hover:text-destructive"
+                          className="w-full justify-start gap-2 border-white/10 bg-white/5 text-red-300 hover:bg-red-500/10 hover:text-red-200"
                           onClick={() => {
                             handleLogout()
                             setIsOpen(false)
@@ -253,7 +253,7 @@ export function Navbar() {
                       </div>
                     ) : (
                       <Link href="/login" onClick={() => setIsOpen(false)}>
-                        <Button className="w-full gap-2">
+                        <Button className="w-full gap-2 bg-orange-500 text-white hover:bg-orange-600">
                           <User className="h-4 w-4" />
                           {t("navbar.loginSignup")}
                         </Button>

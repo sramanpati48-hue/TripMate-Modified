@@ -77,7 +77,7 @@ export function LiveNotificationsPanel() {
       {/* Notification Button */}
       <Button
         size="icon"
-        className="h-14 w-14 rounded-full shadow-lg relative"
+        className="relative h-14 w-14 rounded-full border border-white/10 bg-orange-500 text-white shadow-lg shadow-black/30 hover:bg-orange-600"
         onClick={() => setIsOpen(!isOpen)}
       >
         <Bell className="h-6 w-6" />
@@ -92,21 +92,21 @@ export function LiveNotificationsPanel() {
 
       {/* Notifications Panel */}
       {isOpen && (
-        <div className="absolute bottom-16 right-0 w-96 max-h-[600px] bg-background border rounded-lg shadow-2xl overflow-hidden">
+        <div className="absolute bottom-16 right-0 max-h-[600px] w-96 overflow-hidden rounded-2xl border border-white/10 bg-[#0b1220]/95 text-white shadow-2xl shadow-black/40 backdrop-blur-xl">
           {/* Header */}
-          <div className="p-4 border-b flex items-center justify-between bg-secondary/30">
+          <div className="flex items-center justify-between border-b border-white/10 p-4 bg-white/5">
             <div className="flex items-center gap-2">
               <Bell className="h-5 w-5" />
               <h3 className="font-semibold">Live Updates</h3>
-              <Badge variant="secondary" className="animate-pulse">● Live</Badge>
+              <Badge variant="secondary" className="animate-pulse border border-emerald-400/20 bg-emerald-400/10 text-emerald-300">● Live</Badge>
             </div>
             <div className="flex items-center gap-2">
               {notifications.length > 0 && (
-                <Button variant="ghost" size="sm" onClick={clearAll}>
+                <Button variant="ghost" size="sm" onClick={clearAll} className="text-white hover:bg-white/10 hover:text-white">
                   Clear All
                 </Button>
               )}
-              <Button variant="ghost" size="icon" onClick={() => setIsOpen(false)}>
+              <Button variant="ghost" size="icon" onClick={() => setIsOpen(false)} className="text-white hover:bg-white/10 hover:text-white">
                 <X className="h-4 w-4" />
               </Button>
             </div>
@@ -115,32 +115,32 @@ export function LiveNotificationsPanel() {
           {/* Notifications List */}
           <div className="max-h-[500px] overflow-y-auto">
             {notifications.length === 0 ? (
-              <div className="p-8 text-center text-muted-foreground">
+              <div className="p-8 text-center text-white/65">
                 <CheckCircle className="h-12 w-12 mx-auto mb-3 opacity-50" />
                 <p>No new notifications</p>
                 <p className="text-sm mt-1">We'll notify you of any updates</p>
               </div>
             ) : (
-              <div className="divide-y">
+              <div className="divide-y divide-white/8">
                 {notifications.map((notif) => (
                   <div
                     key={notif.id}
-                    className={`p-4 hover:bg-secondary/50 cursor-pointer transition-colors border-l-4 ${getColor(notif.severity)}`}
+                    className={`cursor-pointer border-l-4 p-4 transition-colors hover:bg-white/5 ${getColor(notif.severity)}`}
                     onClick={() => handleNotificationClick(notif)}
                   >
                     <div className="flex items-start gap-3">
-                      <div className={`p-2 rounded-lg ${getColor(notif.severity)}`}>
+                      <div className={`rounded-lg p-2 ${getColor(notif.severity)}`}>
                         {getIcon(notif.type)}
                       </div>
                       <div className="flex-1 min-w-0">
                         <h4 className="font-semibold text-sm mb-1">{notif.title}</h4>
-                        <p className="text-sm text-muted-foreground">{notif.message}</p>
+                        <p className="text-sm text-white/65">{notif.message}</p>
                         <div className="flex items-center justify-between mt-2">
-                          <span className="text-xs text-muted-foreground">
+                          <span className="text-xs text-white/45">
                             {new Date(notif.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                           </span>
                           {notif.actionLabel && (
-                            <Button variant="ghost" size="sm" className="h-7 text-xs">
+                            <Button variant="ghost" size="sm" className="h-7 text-xs text-white hover:bg-white/10 hover:text-white">
                               {notif.actionLabel}
                             </Button>
                           )}

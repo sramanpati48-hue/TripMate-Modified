@@ -24,7 +24,7 @@ export function TrendingDestinationsWidget() {
   }, [])
 
   return (
-    <Card>
+    <Card className="trending-widget-no-images">
       <CardHeader className="pb-3">
         <div className="flex items-center justify-between">
           <CardTitle className="text-lg flex items-center gap-2">
@@ -56,13 +56,6 @@ export function TrendingDestinationsWidget() {
               `}>
                 {index + 1}
               </div>
-
-              {/* Image */}
-              <img
-                src={place.image}
-                alt={place.name}
-                className="w-12 h-12 rounded-lg object-cover"
-              />
 
               {/* Info */}
               <div className="flex-1 min-w-0">

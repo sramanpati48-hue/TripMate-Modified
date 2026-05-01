@@ -6,13 +6,13 @@ import { Navbar } from "@/components/navbar"
 import { Footer } from "@/components/footer"
 import { TripDayCard, type TripActivity } from "@/components/trip-day-card"
 import { AddActivityDialog } from "@/components/add-activity-dialog"
-import { AIItineraryGenerator } from "@/components/ai-itinerary-generator"
+import AIPromptInterface from "@/components/AIPromptInterface"
+import TripMateHero from "@/components/trip-mate-hero"
 import { PricingInfo } from "@/components/pricing-info"
 import { LiveNotificationsPanel } from "@/components/live-notifications"
 import { TripSummary } from "@/components/trip-summary"
 import { Button } from "@/components/ui/button"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Plus, CalendarDays, Sparkles } from "lucide-react"
+import { Plus } from "lucide-react"
 
 interface TripDay {
   day: number
@@ -156,6 +156,7 @@ const initialTrip: TripDay[] = [
 export default function TripPlannerPage() {
   const [trip, setTrip] = useState<TripDay[]>(initialTrip)
   const [addingToDay, setAddingToDay] = useState<number | null>(null)
+  const [activeTab, setActiveTab] = useState<"manual" | "ai">("manual")
   const router = useRouter()
   const draftAppliedRef = useRef(false)
 
@@ -251,36 +252,42 @@ export default function TripPlannerPage() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="relative min-h-screen flex flex-col overflow-hidden bg-transparent text-slate-900">
       <Navbar />
-      <main className="flex-1 bg-secondary/20">
-        <div className="container mx-auto px-4 py-8">
-          <div className="mb-8">
-            <div className="flex items-start justify-between mb-4">
-              <div>
-                <h1 className="text-3xl font-bold mb-2">
-                  Trip Planner - <span className="text-primary">Explore India</span>
-                </h1>
-                <p className="text-muted-foreground">Plan your perfect Indian adventure day by day or let AI create your itinerary</p>
-              </div>
-              <PricingInfo />
-            </div>
+      <main className="relative flex-1 overflow-hidden bg-transparent">
+        <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+          <video
+            className="absolute inset-0 h-full w-full object-cover object-center opacity-100 saturate-125 brightness-110"
+            src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260329_050842_be71947f-f16e-4a14-810c-06e83d23ddb5.mp4"
+            muted
+            playsInline
+            autoPlay
+            loop
+          />
+          <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.02)_0%,rgba(255,246,235,0.10)_45%,rgba(255,250,243,0.18)_100%)]" />
+          <div className="absolute inset-x-0 top-0 h-[50vh] bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.08),transparent_45%)]" />
+          <div className="absolute inset-x-0 bottom-0 h-[44vh] bg-[linear-gradient(180deg,rgba(255,248,240,0.00)_0%,rgba(255,248,240,0.06)_100%)]" />
+          <div className="absolute inset-x-0 top-[50vh] h-[50vh] origin-top scale-y-[-1] opacity-28 blur-[1px]">
+            <video
+              className="absolute inset-0 h-full w-full object-cover object-center"
+              src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260329_050842_be71947f-f16e-4a14-810c-06e83d23ddb5.mp4"
+              muted
+              playsInline
+              autoPlay
+              loop
+            />
+            <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,248,240,0.12)_0%,rgba(255,248,240,0.82)_100%)]" />
+          </div>
+        </div>
+        <div className="container relative z-10 mx-auto px-4 py-8">
+          <div className="mb-8 flex items-start justify-end text-slate-900">
+            <PricingInfo />
           </div>
 
-          <Tabs defaultValue="manual" className="space-y-6">
-            <TabsList className="grid w-full max-w-md grid-cols-2">
-              <TabsTrigger value="manual" className="gap-2">
-                <CalendarDays className="h-4 w-4" />
-                Manual Planning
-              </TabsTrigger>
-              <TabsTrigger value="ai" className="gap-2">
-                <Sparkles className="h-4 w-4" />
-                AI Generator
-              </TabsTrigger>
-            </TabsList>
+          <TripMateHero activeTab={activeTab} onTabChange={setActiveTab} />
 
-            <TabsContent value="manual" className="space-y-6">
-              {/* Trip Summary */}
+          {activeTab === "manual" ? (
+            <div className="mt-6 space-y-6 rounded-[28px] border border-white/12 bg-white/3 p-5 shadow-2xl shadow-orange-100/10 backdrop-blur-sm md:p-8">
               <TripSummary days={trip} />
 
               <div className="grid gap-6 lg:grid-cols-2">
@@ -298,19 +305,17 @@ export default function TripPlannerPage() {
               </div>
 
               <div className="flex justify-center">
-                <Button variant="outline" onClick={addNewDay} className="gap-2 bg-transparent">
+                <Button variant="outline" onClick={addNewDay} className="gap-2 border-white/15 bg-white/6 text-slate-900 hover:bg-white/12 hover:text-slate-900">
                   <Plus className="h-4 w-4" />
                   Add Another Day
                 </Button>
               </div>
-            </TabsContent>
-
-            <TabsContent value="ai">
-              <div className="max-w-2xl mx-auto">
-                <AIItineraryGenerator />
-              </div>
-            </TabsContent>
-          </Tabs>
+            </div>
+          ) : (
+            <div className="mx-auto mt-6 max-w-2xl rounded-[28px] border border-white/12 bg-white/3 p-4 shadow-2xl shadow-orange-100/10 backdrop-blur-sm md:p-8">
+              <AIPromptInterface />
+            </div>
+          )}
         </div>
       </main>
       <Footer />

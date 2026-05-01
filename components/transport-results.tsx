@@ -216,7 +216,7 @@ export function TransportResults({ searchParams }: TransportResultsProps) {
       setTimeout(() => {
         setResults(mockResults)
         setLoading(false)
-      }, 800)
+      }, 200)
     }
 
     fetchResults()

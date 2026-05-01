@@ -68,19 +68,19 @@ export function TripDayCard({
   }
 
   return (
-    <Card className="overflow-hidden">
-      <CardHeader className="bg-primary/5 py-3 px-4">
+    <Card className="overflow-hidden border border-white/15 bg-white/5 text-slate-900 shadow-lg shadow-orange-100/10 backdrop-blur-md">
+      <CardHeader className="border-b border-white/10 bg-white/10 py-3 px-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="flex items-center justify-center w-8 h-8 rounded-full bg-primary text-primary-foreground text-sm font-bold">
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-orange-500 to-amber-500 text-sm font-bold text-white shadow-lg shadow-orange-500/20">
               {day}
             </div>
             <div>
-              <h3 className="font-semibold">Day {day}</h3>
-              <p className="text-sm text-muted-foreground">{date}</p>
+              <h3 className="font-semibold text-slate-950">Day {day}</h3>
+              <p className="text-sm text-slate-600">{date}</p>
             </div>
           </div>
-          <Button variant="ghost" size="sm" onClick={onAddActivity} className="gap-1">
+          <Button variant="ghost" size="sm" onClick={onAddActivity} className="gap-1 text-slate-900 hover:bg-white/50 hover:text-slate-900">
             <Plus className="h-4 w-4" />
             <span className="hidden sm:inline">Add</span>
           </Button>
@@ -89,8 +89,8 @@ export function TripDayCard({
       <CardContent className="p-0">
         {activities.length === 0 ? (
           <div className="p-8 text-center">
-            <p className="text-muted-foreground mb-3">No activities planned</p>
-            <Button variant="outline" size="sm" onClick={onAddActivity} className="gap-2 bg-transparent">
+            <p className="mb-3 text-slate-700">No activities planned</p>
+            <Button variant="outline" size="sm" onClick={onAddActivity} className="gap-2 border-white/15 bg-white/35 text-slate-900 hover:bg-white/50 hover:text-slate-900">
               <Plus className="h-4 w-4" />
               Add Activity
             </Button>
@@ -104,19 +104,19 @@ export function TripDayCard({
                   onDragStart={(e) => handleDragStart(e, activity.id)}
                   onDragOver={handleDragOver}
                   onDrop={(e) => handleDrop(e, activity.id)}
-                  className={`flex items-start gap-3 p-4 transition-all hover:bg-secondary/30 ${
+                  className={`flex items-start gap-3 border-t border-white/8 p-4 transition-all hover:bg-white/10 ${
                     draggedItem === activity.id ? "opacity-50" : ""
                   }`}
                 >
                   <button className="mt-1 cursor-grab active:cursor-grabbing touch-none">
-                    <GripVertical className="h-4 w-4 text-muted-foreground" />
+                    <GripVertical className="h-4 w-4 text-slate-500" />
                   </button>
 
                   <div className="flex-1 min-w-0">
                     <div className="flex items-start justify-between gap-2">
                       <div>
-                        <h4 className="font-medium">{activity.name}</h4>
-                        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 text-sm text-muted-foreground">
+                        <h4 className="font-medium text-slate-950">{activity.name}</h4>
+                        <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-slate-600">
                           <span className="flex items-center gap-1">
                             <Clock className="h-3 w-3" />
                             {activity.time} ({activity.duration})
@@ -127,16 +127,16 @@ export function TripDayCard({
                           </span>
                         </div>
                       </div>
-                      <Badge variant="secondary" className="shrink-0">
+                      <Badge variant="secondary" className="shrink-0 border border-white/30 bg-white/60 text-slate-900 hover:bg-white/60">
                         {activity.category}
                       </Badge>
                     </div>
-                    {activity.notes && <p className="mt-2 text-sm text-muted-foreground">{activity.notes}</p>}
+                    {activity.notes && <p className="mt-2 text-sm text-slate-700">{activity.notes}</p>}
                   </div>
 
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon" className="h-8 w-8">
+                      <Button variant="ghost" size="icon" className="h-8 w-8 text-slate-900 hover:bg-white/50 hover:text-slate-900">
                         <MoreVertical className="h-4 w-4" />
                       </Button>
                     </DropdownMenuTrigger>
@@ -152,22 +152,22 @@ export function TripDayCard({
                 
                 {/* Transport info between activities */}
                 {index < activities.length - 1 && activity.transportMode && (
-                  <div className="flex items-center gap-2 px-4 py-2 bg-secondary/20 border-y">
-                    <div className="flex items-center justify-center w-8 h-8 rounded-full bg-background border">
-                      <ArrowDown className="h-4 w-4 text-muted-foreground" />
+                  <div className="flex items-center gap-2 border-y border-white/10 bg-white/10 px-4 py-2">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full border border-white/15 bg-white/50">
+                      <ArrowDown className="h-4 w-4 text-slate-500" />
                     </div>
-                    <div className="flex-1 flex items-center gap-3 text-sm">
-                      <span className="flex items-center gap-1 font-medium">
+                    <div className="flex flex-1 items-center gap-3 text-sm">
+                      <span className="flex items-center gap-1 font-medium text-slate-900">
                         <Car className="h-3.5 w-3.5" />
                         {getTransportModeName(activity.transportMode as any)}
                       </span>
                       {activity.distanceToNext && (
-                        <span className="text-muted-foreground">
+                        <span className="text-slate-600">
                           {activity.distanceToNext} km
                         </span>
                       )}
                       {activity.transportFare && (
-                        <span className="flex items-center gap-1 text-primary font-semibold ml-auto">
+                        <span className="ml-auto flex items-center gap-1 font-semibold text-orange-700">
                           <IndianRupee className="h-3.5 w-3.5" />
                           {activity.transportFare.toLocaleString('en-IN')}
                         </span>

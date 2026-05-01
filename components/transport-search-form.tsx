@@ -38,6 +38,9 @@ export function TransportSearchForm({ onSearch }: TransportSearchFormProps) {
 
   const fromSuggestions = getFilteredCities(from)
   const toSuggestions = getFilteredCities(to)
+  const glassFieldClass = "!bg-transparent border-white/20 text-foreground placeholder:text-muted-foreground/80 backdrop-blur-xl"
+  const glassButtonClass = "!bg-white/10 !text-foreground border-white/20 hover:!bg-white/20 backdrop-blur-xl"
+  const glassPanelClass = "bg-white/10 backdrop-blur-xl border border-white/20 shadow-xl shadow-black/5"
 
   const handleSwap = () => {
     const temp = from
@@ -91,12 +94,12 @@ export function TransportSearchForm({ onSearch }: TransportSearchFormProps) {
               onFocus={() => setShowFromSuggestions(true)}
               onBlur={() => setTimeout(() => setShowFromSuggestions(false), 200)}
               placeholder="Enter origin city"
-              className="pl-9"
+              className={`pl-9 ${glassFieldClass}`}
               required
             />
           </div>
           {showFromSuggestions && from && fromSuggestions.length > 0 && (
-            <div className="absolute z-50 w-full mt-1 bg-background border rounded-md shadow-lg max-h-60 overflow-auto">
+            <div className={`absolute z-50 w-full mt-1 border rounded-md max-h-60 overflow-auto ${glassPanelClass}`}>
               {fromSuggestions.slice(0, 8).map((city) => (
                 <button
                   key={city}
@@ -122,7 +125,7 @@ export function TransportSearchForm({ onSearch }: TransportSearchFormProps) {
           variant="outline"
           size="icon"
           onClick={handleSwap}
-          className="mb-0"
+          className={`mb-0 ${glassButtonClass}`}
         >
           <ArrowLeftRight className="h-4 w-4" />
         </Button>
@@ -141,12 +144,12 @@ export function TransportSearchForm({ onSearch }: TransportSearchFormProps) {
               onFocus={() => setShowToSuggestions(true)}
               onBlur={() => setTimeout(() => setShowToSuggestions(false), 200)}
               placeholder="Enter destination city"
-              className="pl-9"
+              className={`pl-9 ${glassFieldClass}`}
               required
             />
           </div>
           {showToSuggestions && to && toSuggestions.length > 0 && (
-            <div className="absolute z-50 w-full mt-1 bg-background border rounded-md shadow-lg max-h-60 overflow-auto">
+            <div className={`absolute z-50 w-full mt-1 border rounded-md max-h-60 overflow-auto ${glassPanelClass}`}>
               {toSuggestions.slice(0, 8).map((city) => (
                 <button
                   key={city}
@@ -178,6 +181,7 @@ export function TransportSearchForm({ onSearch }: TransportSearchFormProps) {
             value={date}
             onChange={(e) => setDate(e.target.value)}
             min={new Date().toISOString().split('T')[0]}
+            className={glassFieldClass}
             required
           />
         </div>
@@ -191,6 +195,7 @@ export function TransportSearchForm({ onSearch }: TransportSearchFormProps) {
               value={returnDate}
               onChange={(e) => setReturnDate(e.target.value)}
               min={date || new Date().toISOString().split('T')[0]}
+              className={glassFieldClass}
               required={tripType === "round-trip"}
             />
           </div>
@@ -201,7 +206,7 @@ export function TransportSearchForm({ onSearch }: TransportSearchFormProps) {
       <div className="space-y-2">
         <Label htmlFor="passengers">Passengers</Label>
         <Select value={passengers} onValueChange={setPassengers}>
-          <SelectTrigger id="passengers" className="w-full md:w-48">
+          <SelectTrigger id="passengers" className={`w-full md:w-48 ${glassFieldClass}`}>
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -214,7 +219,7 @@ export function TransportSearchForm({ onSearch }: TransportSearchFormProps) {
         </Select>
       </div>
 
-      <Button type="submit" size="lg" className="w-full gap-2">
+      <Button type="submit" size="lg" className="w-full gap-2 bg-gradient-to-r from-primary/90 to-primary text-primary-foreground shadow-lg shadow-primary/20">
         <Search className="h-5 w-5" />
         Search Transport Options
       </Button>
