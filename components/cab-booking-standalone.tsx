@@ -78,24 +78,7 @@ export default function CabBookingStandalone() {
 
   const isValid = (useCurrentLocation || pickupLocation) && dropLocation
 
-  // Build a simple Uber deeplink with coordinates if available, otherwise use google maps directions
-  function buildUberUrl(pickupCoords: {lat:number;lng:number}|null, dropLocationName: string, pickupName: string) {
-    if (pickupCoords) {
-      const puLat = pickupCoords.lat
-      const puLng = pickupCoords.lng
-      // use mobile deep link
-      const params = new URLSearchParams()
-      params.set('action', 'setPickup')
-      params.set('pickup[latitude]', String(puLat))
-      params.set('pickup[longitude]', String(puLng))
-      params.set('pickup[nickname]', pickupName || 'Pickup')
-      params.set('dropoff[formatted_address]', dropLocationName)
-      return `https://m.uber.com/ul/?${params.toString()}`
-    }
-    // fallback to google maps directions by name
-    const google = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(pickupName)}&destination=${encodeURIComponent(dropLocationName)}&travelmode=driving`
-    return google
-  }
+  // provider deep link builder is `buildProviderUrl` (imported)
 
   return (
     <div className="min-h-screen w-full">
@@ -189,13 +172,23 @@ export default function CabBookingStandalone() {
                         </div>
                       </div>
 
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2 text-sm text-slate-600">
-                          <Clock className="h-4 w-4" />
-                          ETA: 2–10 min
-                        </div>
-                        <Button size="sm" onClick={() => handleBook(opt)}>Book</Button>
-                      </div>
+                            <div className="mt-4 flex items-center justify-between">
+                              <div className="flex items-center gap-2 text-sm text-slate-600">
+                                <Clock className="h-4 w-4" />
+                                ETA: 2–10 min
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <a
+                                  rel="noreferrer"
+                                  target="_blank"
+                                  href={buildProviderUrl(opt.mode, pickupCoords, null, pickupLocation, dropLocation)}
+                                  className="text-sm text-blue-600 hover:underline"
+                                >
+                                  Open provider
+                                </a>
+                                <Button size="sm" onClick={() => handleBook(opt)}>Book</Button>
+                              </div>
+                            </div>
                     </CardContent>
                   </Card>
                 ))}
