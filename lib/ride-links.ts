@@ -11,23 +11,27 @@ export function buildProviderUrl(
 
   // Uber deep link (mobile / web)
   if (mode.startsWith('uber')) {
+    // build an Uber deep-link; prefer coordinates when available but allow prefilled names
+    const params = new URLSearchParams()
+    params.set('action', 'setPickup')
     if (pickupCoords) {
-      const params = new URLSearchParams()
-      params.set('action', 'setPickup')
       params.set('pickup[latitude]', String(pickupCoords.lat))
       params.set('pickup[longitude]', String(pickupCoords.lng))
       params.set('pickup[nickname]', pname)
-      if (dropCoords) {
-        params.set('dropoff[latitude]', String(dropCoords.lat))
-        params.set('dropoff[longitude]', String(dropCoords.lng))
-        params.set('dropoff[nickname]', dname)
-      } else {
-        params.set('dropoff[formatted_address]', dname)
-      }
-      return `https://m.uber.com/ul/?${params.toString()}`
+    } else {
+      params.set('pickup[nickname]', pname)
+      params.set('pickup[formatted_address]', pname)
     }
-    // fallback to google directions by name
-    return `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(pname)}&destination=${encodeURIComponent(dname)}&travelmode=driving`
+
+    if (dropCoords) {
+      params.set('dropoff[latitude]', String(dropCoords.lat))
+      params.set('dropoff[longitude]', String(dropCoords.lng))
+      params.set('dropoff[nickname]', dname)
+    } else {
+      params.set('dropoff[formatted_address]', dname)
+    }
+
+    return `https://m.uber.com/ul/?${params.toString()}`
   }
 
   // Ola booking web link (best-effort)
