@@ -1,11 +1,12 @@
 "use client"
 
-import React, { useMemo, useState } from "react"
+import React, { useMemo, useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { calculateFare, estimateDistance, formatFare, type TransportFare } from "@/lib/transport-service"
+import { geocodeDestination, searchNearbyPlaces } from "@/lib/google-maps-service"
 import { Clock, MapPin, Navigation } from "lucide-react"
 
 interface CabBookingProps {
@@ -21,23 +22,65 @@ export default function CabBooking({ from = "", to = "", passengers = 1 }: CabBo
   const [dropLocation, setDropLocation] = useState(to)
   const [useCurrentLocation, setUseCurrentLocation] = useState(false)
   const [booking, setBooking] = useState<{ id: string; mode: string; eta: number; fare: number } | null>(null)
+  const [pickupCoords, setPickupCoords] = useState<{lat:number;lng:number}|null>(null)
+  const [suggestions, setSuggestions] = useState<any[]>([])
+  const [loadingSuggestions, setLoadingSuggestions] = useState(false)
+  const [liveTime, setLiveTime] = useState<string | null>(null)
+  const refreshRef = useRef<number | null>(null)
 
   const displayPickup = useCurrentLocation ? "📍 Current Location" : pickupLocation
   const distance = useMemo(() => estimateDistance(pickupLocation || "", dropLocation || ""), [pickupLocation, dropLocation])
 
   const options: TransportFare[] = useMemo(() => {
-    return cabModes.map((mode) => calculateFare(mode as any, distance))
-  }, [distance])
+    return cabModes.map((mode) => calculateFare(mode as any, distance, liveTime || undefined))
+  }, [distance, liveTime])
+
+  useEffect(() => {
+    const updateTime = () => setLiveTime(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }))
+    updateTime()
+    const id = window.setInterval(updateTime, 10000)
+    refreshRef.current = id
+    return () => { if (refreshRef.current) window.clearInterval(refreshRef.current) }
+  }, [])
 
   const handleCurrentLocation = () => {
     setUseCurrentLocation(!useCurrentLocation)
     if (!useCurrentLocation) {
       // In a real app, you'd get the user's actual location via geolocation API
       setPickupLocation("Current Location")
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(async (pos) => {
+          const lat = pos.coords.latitude
+          const lng = pos.coords.longitude
+          setPickupCoords({ lat, lng })
+          const dest = await geocodeDestination(`${lat},${lng}`)
+          if (dest) setPickupLocation(dest.name)
+        }, (err) => console.warn('Geolocation error', err), { enableHighAccuracy: true })
+      }
     } else {
       setPickupLocation("")
+      setPickupCoords(null)
     }
   }
+
+  // suggestions for pickup name
+  useEffect(() => {
+    let mounted = true
+    ;(async () => {
+      if (!pickupLocation || pickupLocation.toLowerCase().includes('current') || pickupLocation.trim().length < 2) {
+        setSuggestions([])
+        return
+      }
+      setLoadingSuggestions(true)
+      const geo = await geocodeDestination(pickupLocation)
+      if (geo && mounted) {
+        const nearby = await searchNearbyPlaces(geo.location, 'restaurant')
+        if (mounted) setSuggestions(nearby.slice(0,6))
+      }
+      setLoadingSuggestions(false)
+    })()
+    return () => { mounted = false }
+  }, [pickupLocation])
 
   const handleBook = (option: TransportFare) => {
     const id = `BK-${Math.random().toString(36).slice(2, 9).toUpperCase()}`

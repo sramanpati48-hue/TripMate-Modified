@@ -1,11 +1,12 @@
 "use client"
 
-import React, { useMemo, useState } from "react"
+import React, { useMemo, useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { calculateFare, estimateDistance, formatFare, type TransportFare } from "@/lib/transport-service"
+import { geocodeDestination, searchNearbyPlaces, getDirectionsUrl } from "@/lib/google-maps-service"
 import { Clock, MapPin, Navigation } from "lucide-react"
 
 const cabModes = ["uber-go", "ola-mini", "taxi", "uber-premier"] as const
@@ -15,20 +16,55 @@ export default function CabBookingStandalone() {
   const [dropLocation, setDropLocation] = useState("")
   const [useCurrentLocation, setUseCurrentLocation] = useState(false)
   const [booking, setBooking] = useState<{ id: string; mode: string; eta: number; fare: number } | null>(null)
+  const [pickupCoords, setPickupCoords] = useState<{lat:number;lng:number}|null>(null)
+  const [suggestions, setSuggestions] = useState<Array<any>>([])
+  const [loadingSuggestions, setLoadingSuggestions] = useState(false)
+  const [liveTime, setLiveTime] = useState<string | null>(null)
+  const refreshRef = useRef<number | null>(null)
 
   const displayPickup = useCurrentLocation ? "📍 Current Location" : pickupLocation
   const distance = useMemo(() => estimateDistance(pickupLocation || "", dropLocation || ""), [pickupLocation, dropLocation])
 
   const options: TransportFare[] = useMemo(() => {
-    return cabModes.map((mode) => calculateFare(mode as any, distance))
+    return cabModes.map((mode) => calculateFare(mode as any, distance, liveTime || undefined))
   }, [distance])
+
+  // Update live time for surge calc and refresh fares periodically
+  useEffect(() => {
+    const updateTime = () => {
+      const now = new Date()
+      setLiveTime(now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }))
+    }
+    updateTime()
+    const id = window.setInterval(updateTime, 10000)
+    refreshRef.current = id
+    return () => { if (refreshRef.current) window.clearInterval(refreshRef.current) }
+  }, [])
 
   const handleCurrentLocation = () => {
     setUseCurrentLocation(!useCurrentLocation)
     if (!useCurrentLocation) {
       setPickupLocation("Current Location")
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          async (pos) => {
+            const lat = pos.coords.latitude
+            const lng = pos.coords.longitude
+            setPickupCoords({ lat, lng })
+
+            // optionally reverse-geocode to a friendly name
+            const dest = await geocodeDestination(`${lat},${lng}`)
+            if (dest) setPickupLocation(dest.name)
+          },
+          (err) => {
+            console.warn('Geolocation error', err)
+          },
+          { enableHighAccuracy: true, timeout: 8000 }
+        )
+      }
     } else {
       setPickupLocation("")
+      setPickupCoords(null)
     }
   }
 
@@ -39,6 +75,25 @@ export default function CabBookingStandalone() {
   }
 
   const isValid = (useCurrentLocation || pickupLocation) && dropLocation
+
+  // Build a simple Uber deeplink with coordinates if available, otherwise use google maps directions
+  function buildUberUrl(pickupCoords: {lat:number;lng:number}|null, dropLocationName: string, pickupName: string) {
+    if (pickupCoords) {
+      const puLat = pickupCoords.lat
+      const puLng = pickupCoords.lng
+      // use mobile deep link
+      const params = new URLSearchParams()
+      params.set('action', 'setPickup')
+      params.set('pickup[latitude]', String(puLat))
+      params.set('pickup[longitude]', String(puLng))
+      params.set('pickup[nickname]', pickupName || 'Pickup')
+      params.set('dropoff[formatted_address]', dropLocationName)
+      return `https://m.uber.com/ul/?${params.toString()}`
+    }
+    // fallback to google maps directions by name
+    const google = `https://www.google.com/maps/dir/?api=1&origin=${encodeURIComponent(pickupName)}&destination=${encodeURIComponent(dropLocationName)}&travelmode=driving`
+    return google
+  }
 
   return (
     <div className="min-h-screen w-full">
