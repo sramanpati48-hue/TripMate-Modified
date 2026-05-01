@@ -110,6 +110,7 @@ export async function POST(request: NextRequest) {
       bio,
       ageRange,
       isActive,
+      avatar,
     } = body;
 
     // Validate required fields
@@ -173,6 +174,30 @@ export async function POST(request: NextRequest) {
         },
       });
     }
+
+    // Update avatar on User model if provided
+    if (avatar !== undefined) {
+      await prisma.user.update({
+        where: { id: userId },
+        data: { avatar }
+      });
+      
+      // Re-fetch profile to get updated user data (avatar)
+      const freshProfile = await prisma.travelProfile.findUnique({
+        where: { userId },
+        include: {
+          user: {
+            select: {
+              name: true,
+              email: true,
+              avatar: true,
+            },
+          },
+        },
+      });
+      if (freshProfile) profile = freshProfile;
+    }
+
 
     // Parse JSON fields for response
     const responseData = {

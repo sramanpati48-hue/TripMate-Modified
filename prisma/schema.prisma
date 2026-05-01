@@ -37,6 +37,8 @@ model User {
   travelProfile TravelProfile?
   sentRequests  TravelMatchRequest[] @relation("SentRequests")
   receivedRequests TravelMatchRequest[] @relation("ReceivedRequests")
+  sentMessages     ChatMessage[] @relation("SentMessages")
+  receivedMessages ChatMessage[] @relation("ReceivedMessages")
   accounts      Account[]
   sessions      Session[]
 }
@@ -201,4 +203,17 @@ model TravelMatchRequest {
   updatedAt         DateTime @updatedAt
   
   @@unique([senderId, receiverId, destination])
+}
+
+model ChatMessage {
+  id         String   @id @default(cuid())
+  senderId   String
+  sender     User     @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+  receiverId String
+  receiver   User     @relation("ReceivedMessages", fields: [receiverId], references: [id], onDelete: Cascade)
+  content    String
+  read       Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  @@index([senderId, receiverId])
 }

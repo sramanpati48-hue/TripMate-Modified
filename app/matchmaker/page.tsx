@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Users, Heart, MessageSquare, Settings, Loader2, UserPlus } from "lucide-react";
+import { Users, Heart, MessageSquare, Settings, Loader2, UserPlus, Send } from "lucide-react";
 import { TravelProfileCard } from "@/components/travel-profile-card";
 import { MatchFilters } from "@/components/match-filters";
 import { TravelRequestDialog } from "@/components/travel-request-dialog";
@@ -74,6 +74,7 @@ export default function MatchmakerPage() {
   const [selectedMatch, setSelectedMatch] = useState<TravelProfile | null>(null);
   const [showRequestDialog, setShowRequestDialog] = useState(false);
   const [showProfileDialog, setShowProfileDialog] = useState(false);
+  const [activeTab, setActiveTab] = useState("matches");
   const [filters, setFilters] = useState({
     gender: "any",
     groupPreference: "any",
@@ -210,6 +211,10 @@ export default function MatchmakerPage() {
     }
   };
 
+  const openChatWith = (partnerId: string) => {
+    router.push(`/chat?partnerId=${partnerId}`);
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -282,8 +287,8 @@ export default function MatchmakerPage() {
         </Button>
       </div>
 
-      <Tabs defaultValue="matches" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+        <TabsList className="grid w-full grid-cols-3 max-w-2xl mx-auto">
           <TabsTrigger value="matches">
             <Users className="mr-2 h-4 w-4" />
             Matches ({matches.length})
@@ -354,17 +359,29 @@ export default function MatchmakerPage() {
                         </CardDescription>
                       </div>
                     </div>
-                    <Badge
-                      variant={
-                        request.status === "accepted"
-                          ? "default"
-                          : request.status === "rejected"
-                          ? "destructive"
-                          : "secondary"
-                      }
-                    >
-                      {request.status}
-                    </Badge>
+                    <div className="flex items-center gap-2">
+                      {request.status === "accepted" && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => openChatWith(request.receiver!.id)}
+                        >
+                          <Send className="mr-1 h-3 w-3" />
+                          Message
+                        </Button>
+                      )}
+                      <Badge
+                        variant={
+                          request.status === "accepted"
+                            ? "default"
+                            : request.status === "rejected"
+                            ? "destructive"
+                            : "secondary"
+                        }
+                      >
+                        {request.status}
+                      </Badge>
+                    </div>
                   </div>
                 </CardHeader>
                 {request.message && (
@@ -424,6 +441,18 @@ export default function MatchmakerPage() {
                   {request.message && (
                     <p className="text-sm text-muted-foreground">{request.message}</p>
                   )}
+                  {request.status === "accepted" && (
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        onClick={() => openChatWith(request.sender!.id)}
+                        className="flex-1"
+                      >
+                        <Send className="mr-2 h-4 w-4" />
+                        Message
+                      </Button>
+                    </div>
+                  )}
                   {request.status === "pending" && (
                     <div className="flex gap-2">
                       <Button
@@ -446,6 +475,7 @@ export default function MatchmakerPage() {
             ))
           )}
         </TabsContent>
+
       </Tabs>
 
       {showRequestDialog && selectedMatch && (

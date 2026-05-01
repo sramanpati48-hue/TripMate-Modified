@@ -23,6 +23,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox";
 import { Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface TravelProfile {
   gender: string;
@@ -36,6 +37,9 @@ interface TravelProfile {
   bio: string | null;
   ageRange: string | null;
   isActive: boolean;
+  user?: {
+    avatar: string | null;
+  };
 }
 
 interface CreateProfileDialogProps {
@@ -78,6 +82,7 @@ export function CreateProfileDialog({
     destinations: [] as string[],
     languages: [] as string[],
     isActive: true,
+    avatar: "",
   });
 
   // Input states for array fields
@@ -98,6 +103,7 @@ export function CreateProfileDialog({
         destinations: existingProfile.destinations || [],
         languages: existingProfile.languages || [],
         isActive: existingProfile.isActive !== undefined ? existingProfile.isActive : true,
+        avatar: existingProfile.user?.avatar || "",
       });
     }
   }, [existingProfile]);
@@ -214,6 +220,26 @@ export function CreateProfileDialog({
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-6 py-4">
+          {/* Avatar URL */}
+          <div className="space-y-2">
+            <Label htmlFor="avatar">Profile Picture URL</Label>
+            <div className="flex gap-2">
+              <Input
+                id="avatar"
+                placeholder="https://example.com/photo.jpg"
+                value={formData.avatar || ""}
+                onChange={(e) => setFormData({ ...formData, avatar: e.target.value })}
+              />
+              {formData.avatar && (
+                <Avatar className="h-10 w-10">
+                  <AvatarImage src={formData.avatar} />
+                  <AvatarFallback>{formData.gender?.charAt(0) || "U"}</AvatarFallback>
+                </Avatar>
+              )}
+            </div>
+            <p className="text-[10px] text-muted-foreground">Enter a URL for your profile image</p>
+          </div>
+
           {/* Gender */}
           <div className="space-y-2">
             <Label htmlFor="gender">
