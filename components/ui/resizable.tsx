@@ -2,14 +2,21 @@
 
 import * as React from 'react'
 import { GripVerticalIcon } from 'lucide-react'
-import { PanelGroup as ResizablePanelGroup_Primitive, Panel as ResizablePanel_Primitive, PanelResizeHandle as ResizablePanelResizeHandle_Primitive } from 'react-resizable-panels'
+import {
+  PanelGroup as ResizablePanelGroup_Primitive,
+  Panel as ResizablePanel_Primitive,
+  PanelResizeHandle as ResizablePanelResizeHandle_Primitive,
+  type PanelGroupProps,
+  type PanelProps,
+  type PanelResizeHandleProps,
+} from 'react-resizable-panels'
 
 import { cn } from '@/lib/utils'
 
 function ResizablePanelGroup({
   className,
   ...props
-}: React.ComponentProps<typeof ResizablePanelGroup_Primitive>) {
+}: PanelGroupProps) {
   return (
     <ResizablePanelGroup_Primitive
       data-slot="resizable-panel-group"
@@ -24,17 +31,19 @@ function ResizablePanelGroup({
 
 function ResizablePanel({
   ...props
-}: React.ComponentProps<typeof ResizablePanel_Primitive>) {
+}: PanelProps) {
   return <ResizablePanel_Primitive data-slot="resizable-panel" {...props} />
+}
+
+interface ResizableHandleProps extends PanelResizeHandleProps {
+  withHandle?: boolean
 }
 
 function ResizableHandle({
   withHandle,
   className,
   ...props
-}: React.ComponentProps<typeof ResizablePanelResizeHandle_Primitive> & {
-  withHandle?: boolean
-}) {
+}: ResizableHandleProps) {
   return (
     <ResizablePanelResizeHandle_Primitive
       data-slot="resizable-handle"
@@ -45,7 +54,7 @@ function ResizableHandle({
       {...props}
     >
       {withHandle && (
-        <div className="bg-border z-10 flex h-4 w-3 items-center justify-center rounded-xs border">
+        <div className="z-10 flex h-4 w-3 items-center justify-center rounded-sm border border-border bg-background">
           <GripVerticalIcon className="size-2.5" />
         </div>
       )}
