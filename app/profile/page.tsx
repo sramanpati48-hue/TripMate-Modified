@@ -11,6 +11,9 @@ import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { PlaceCard } from "@/components/place-card"
 import { EmptyState } from "@/components/empty-state"
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 
 // Simplified Place type for profile page
 interface ProfilePlace {
@@ -47,6 +50,9 @@ export default function ProfilePage() {
   const [isLoading, setIsLoading] = useState(true)
   const [favorites, setFavorites] = useState<ProfilePlace[]>([])
   const [favoritesLoading, setFavoritesLoading] = useState(true)
+  const [isAvatarModalOpen, setIsAvatarModalOpen] = useState(false)
+  const [avatarUrl, setAvatarUrl] = useState("")
+  const [isUpdatingAvatar, setIsUpdatingAvatar] = useState(false)
   const router = useRouter()
 
   useEffect(() => {
@@ -143,6 +149,34 @@ export default function ProfilePage() {
     router.push('/login')
   }
 
+  const handleUpdateAvatar = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setIsUpdatingAvatar(true)
+    try {
+      const token = localStorage.getItem('authToken')
+      const response = await fetch('/api/user/profile', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ avatar: avatarUrl })
+      })
+      if (response.ok) {
+        const data = await response.json()
+        if (data.success) {
+          setUser(data.data)
+          localStorage.setItem('user', JSON.stringify(data.data))
+          setIsAvatarModalOpen(false)
+        }
+      }
+    } catch (error) {
+      console.error('Failed to update avatar', error)
+    } finally {
+      setIsUpdatingAvatar(false)
+    }
+  }
+
   if (isLoading) {
     return (
       <div className="min-h-screen flex flex-col">
@@ -180,6 +214,10 @@ export default function ProfilePage() {
                   size="icon"
                   variant="secondary"
                   className="absolute -bottom-1 -right-1 h-8 w-8 rounded-full shadow"
+                  onClick={() => {
+                    setAvatarUrl(user.avatar || "")
+                    setIsAvatarModalOpen(true)
+                  }}
                 >
                   <Camera className="h-4 w-4" />
                 </Button>
@@ -342,6 +380,38 @@ export default function ProfilePage() {
           </Tabs>
         </div>
       </main>
+
+      {/* Avatar Update Modal */}
+      <Dialog open={isAvatarModalOpen} onOpenChange={setIsAvatarModalOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Update Profile Picture</DialogTitle>
+            <DialogDescription>
+              Enter a valid image URL for your new profile picture.
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleUpdateAvatar} className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="avatarUrl">Image URL</Label>
+              <Input
+                id="avatarUrl"
+                placeholder="https://example.com/avatar.jpg"
+                value={avatarUrl}
+                onChange={(e) => setAvatarUrl(e.target.value)}
+              />
+            </div>
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setIsAvatarModalOpen(false)}>
+                Cancel
+              </Button>
+              <Button type="submit" disabled={isUpdatingAvatar}>
+                {isUpdatingAvatar ? "Updating..." : "Save Picture"}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+      
       <Footer />
     </div>
   )
