@@ -206,7 +206,7 @@ In Vercel dashboard, add:
 ### Alternative Deployment Platforms
 
 Add `ANTHROPIC_API_KEY` to environment variables in:
-- **Netlify**: Site settings → Environment variables
+Add `ANTHROPIC_API_KEY` to environment variables in:
 - **Railway**: Project → Variables
 - **Heroku**: Settings → Config Vars
 - **AWS**: Parameter Store / Secrets Manager
