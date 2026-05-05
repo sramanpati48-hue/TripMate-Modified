@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input"
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { Search, Menu, MapPin, Compass, Map, CalendarDays, User, Sparkles, LogOut, Settings, Plane } from "lucide-react"
+import { Search, Menu, MapPin, Compass, Map, CalendarDays, User, Sparkles, LogOut, Settings, Plane, Building2 } from "lucide-react"
 import { ModeToggle } from "@/components/mode-toggle"
 import { LanguageSwitcher } from "@/components/language-switcher"
 import { useI18n } from "@/components/language-provider"
@@ -78,6 +78,7 @@ export function Navbar() {
 
   const navLinks = [
     { href: "/explore", label: t("navbar.explore"), icon: Compass },
+    { href: "/agencies", label: "Agencies", icon: Building2 },
     { href: "/transport", label: t("navbar.transport"), icon: Plane },
     { href: "/map", label: t("navbar.map"), icon: Map },
     { href: "/trip-planner", label: t("navbar.tripPlanner"), icon: CalendarDays },

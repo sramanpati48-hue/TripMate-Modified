@@ -11,7 +11,7 @@ export function Footer() {
     <footer className="relative border-t border-white/10 bg-[#071019]/95 text-white">
       <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(249,115,22,0.10),_transparent_35%)]" />
       <div className="container relative mx-auto px-4 py-12">
-        <div className="grid gap-8 md:grid-cols-4">
+        <div className="grid gap-8 md:grid-cols-5">
           <div className="space-y-4">
             <Link href="/" className="flex items-center gap-2">
               <MapPin className="h-6 w-6 text-orange-300" />
@@ -51,6 +51,24 @@ export function Footer() {
               </Link>
               <Link href="/trip-planner#ai" className="transition-colors hover:text-orange-300">
                 {t("footer.aiItinerary")}
+              </Link>
+            </nav>
+          </div>
+
+          <div className="space-y-4">
+            <h4 className="font-semibold">For Agencies</h4>
+            <nav className="flex flex-col gap-2 text-sm text-white/65">
+              <Link href="/agencies" className="transition-colors hover:text-orange-300">
+                Agency Directory
+              </Link>
+              <Link href="/agencies" className="transition-colors hover:text-orange-300">
+                Register Your Agency
+              </Link>
+              <Link href="/agencies" className="transition-colors hover:text-orange-300">
+                Advertising Plans
+              </Link>
+              <Link href="/agencies" className="transition-colors hover:text-orange-300">
+                Commission Info
               </Link>
             </nav>
           </div>
