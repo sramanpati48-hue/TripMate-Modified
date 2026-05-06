@@ -215,7 +215,7 @@ model TravelMatchRequest {
 }
 
 model ChatMessage {
-  id         String   @id @default(cuid())
+  id         String   @id @default(cuid()) @map("_id")
   senderId   String
   sender     User     @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
   receiverId String
