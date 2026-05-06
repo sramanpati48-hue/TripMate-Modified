@@ -129,13 +129,11 @@ export async function POST(request: NextRequest) {
     )
   } catch (error) {
     console.error('Signup error:', error instanceof Error ? error.stack || error.message : String(error))
-    // Temporarily include error details in the response to aid debugging of deployment issues.
-    // TODO: remove detailed errors before production use.
     return NextResponse.json(
       {
         success: false,
         message: 'An error occurred during signup. Please try again.',
-        error: error instanceof Error ? (error.stack || error.message) : String(error),
+        error: process.env.NODE_ENV === 'development' ? (error instanceof Error ? error.stack : String(error)) : undefined,
       },
       { status: 500 }
     )
