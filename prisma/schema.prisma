@@ -1,17 +1,17 @@
 // Prisma Schema for Travel App
-// Database: SQLite
+// Database: MongoDB Atlas
 
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "mongodb"
   url      = env("DATABASE_URL")
 }
 
 model User {
-  id            String   @id @default(cuid())
+  id            String   @id @default(cuid()) @map("_id")
   email         String   @unique
   password      String?  // Hashed password (optional for OAuth users)
   name          String
@@ -44,8 +44,8 @@ model User {
 }
 
 model Account {
-  id                String  @id @default(cuid())
-  userId            String
+  id                String  @id @default(cuid()) @map("_id")
+  userId            String  @db.String
   type              String
   provider          String
   providerAccountId String
@@ -60,17 +60,20 @@ model Account {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
+  @@index([userId])
 }
 
 model Session {
-  id           String   @id @default(cuid())
+  id           String   @id @default(cuid()) @map("_id")
   sessionToken String   @unique
-  userId       String
+  userId       String   @db.String
   expires      DateTime
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@index([userId])
 }
 
 model VerificationToken {
+  id         String   @id @default(cuid()) @map("_id")
   identifier String
   token      String   @unique
   expires    DateTime
@@ -79,8 +82,8 @@ model VerificationToken {
 }
 
 model Trip {
-  id            String   @id @default(cuid())
-  userId        String
+  id            String   @id @default(cuid()) @map("_id")
+  userId        String   @db.String
   user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   
   destination   String
@@ -94,11 +97,12 @@ model Trip {
   
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+  @@index([userId])
 }
 
 model Favorite {
-  id            String   @id @default(cuid())
-  userId        String
+  id            String   @id @default(cuid()) @map("_id")
+  userId        String   @db.String
   user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   
   placeId       String
@@ -111,11 +115,12 @@ model Favorite {
   createdAt     DateTime @default(now())
   
   @@unique([userId, placeId])
+  @@index([userId])
 }
 
 model Review {
-  id            String   @id @default(cuid())
-  userId        String
+  id            String   @id @default(cuid()) @map("_id")
+  userId        String   @db.String
   user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   
   placeId       String
@@ -127,11 +132,12 @@ model Review {
   
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+  @@index([userId])
 }
 
 model Booking {
-  id            String   @id @default(cuid())
-  userId        String
+  id            String   @id @default(cuid()) @map("_id")
+  userId        String   @db.String
   user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   
   type          String   // hotel, flight, activity, tour
@@ -146,12 +152,13 @@ model Booking {
   
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+  @@index([userId])
 }
 
 // Matchmaker Feature Models
 model TravelProfile {
-  id                String   @id @default(cuid())
-  userId            String   @unique
+  id                String   @id @default(cuid()) @map("_id")
+  userId            String   @unique @db.String
   user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   
   // Gender and preferences
@@ -184,11 +191,11 @@ model TravelProfile {
 }
 
 model TravelMatchRequest {
-  id                String   @id @default(cuid())
-  senderId          String
+  id                String   @id @default(cuid()) @map("_id")
+  senderId          String   @db.String
   sender            User     @relation("SentRequests", fields: [senderId], references: [id], onDelete: Cascade)
   
-  receiverId        String
+  receiverId        String   @db.String
   receiver          User     @relation("ReceivedRequests", fields: [receiverId], references: [id], onDelete: Cascade)
   
   // Request details
@@ -203,6 +210,8 @@ model TravelMatchRequest {
   updatedAt         DateTime @updatedAt
   
   @@unique([senderId, receiverId, destination])
+  @@index([senderId])
+  @@index([receiverId])
 }
 
 model ChatMessage {
