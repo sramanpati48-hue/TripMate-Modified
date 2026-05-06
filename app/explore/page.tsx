@@ -12,7 +12,10 @@ import { EmptyState } from "@/components/empty-state"
 import { PlaceDetailsDialog } from "@/components/place-details-dialog"
 import { PricingInfo } from "@/components/pricing-info"
 import { LiveNotificationsPanel } from "@/components/live-notifications"
+import { AgencyAdBanner } from "@/components/agency-ad-banner"
+import { AgencyMatchEngine } from "@/components/agency-match-engine"
 import { mockPlaces, type Place, type Region, type Category } from "@/lib/mock-data"
+import { getEliteAgencies } from "@/lib/agency-data"
 import { SearchX } from "lucide-react"
 
 export default function ExplorePage() {
@@ -146,9 +149,31 @@ export default function ExplorePage() {
                 <PricingInfo />
               </div>
               <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                {filteredPlaces.map((place) => (
+                {filteredPlaces.slice(0, 8).map((place) => (
                   <PlaceCard key={place.id} place={place} onSelect={setSelectedPlace} />
                 ))}
+              </div>
+
+              {/* Inline Agency Ad Banner */}
+              {filteredPlaces.length > 4 && (
+                <AgencyAdBanner agency={getEliteAgencies()[0]} variant="inline" />
+              )}
+
+              {/* Remaining places */}
+              {filteredPlaces.length > 8 && (
+                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 mt-6">
+                  {filteredPlaces.slice(8).map((place) => (
+                    <PlaceCard key={place.id} place={place} onSelect={setSelectedPlace} />
+                  ))}
+                </div>
+              )}
+
+              {/* Agency Match Engine */}
+              <div className="mt-12 p-6 rounded-2xl bg-muted/30 border border-border/50">
+                <AgencyMatchEngine
+                  destination={searchQuery || undefined}
+                  maxResults={4}
+                />
               </div>
             </>
           ) : (
