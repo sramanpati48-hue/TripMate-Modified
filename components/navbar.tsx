@@ -12,6 +12,7 @@ import { Search, Menu, MapPin, Compass, Map, CalendarDays, User, Sparkles, LogOu
 import { ModeToggle } from "@/components/mode-toggle"
 import { LanguageSwitcher } from "@/components/language-switcher"
 import { useI18n } from "@/components/language-provider"
+import { userEventBus } from "@/lib/user-event"
 
 export function Navbar() {
   const [isOpen, setIsOpen] = useState(false)
@@ -50,7 +51,15 @@ export function Navbar() {
     }
     window.addEventListener('storage', handleStorageChange)
     
-    return () => window.removeEventListener('storage', handleStorageChange)
+    // Listen for user update events (avatar change, profile update, etc.)
+    const unsubscribeUserUpdate = userEventBus.subscribe((updatedUser) => {
+      setUser(updatedUser)
+    })
+    
+    return () => {
+      window.removeEventListener('storage', handleStorageChange)
+      unsubscribeUserUpdate()
+    }
   }, [])
 
   const handleLogout = () => {
