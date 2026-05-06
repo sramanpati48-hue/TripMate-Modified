@@ -4,6 +4,11 @@ import { SignJWT, jwtVerify } from 'jose'
 
 // Environment variables (add to .env.local)
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production'
+if (!process.env.JWT_SECRET || JWT_SECRET === 'your-secret-key-change-in-production') {
+  console.warn(
+    'Warning: JWT_SECRET is not set or is using the default placeholder. Tokens may be insecure or incompatible across environments.'
+  )
+}
 const JWT_SECRET_KEY = new TextEncoder().encode(JWT_SECRET)
 
 // Password validation rules

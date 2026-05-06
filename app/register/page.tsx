@@ -63,29 +63,53 @@ export default function RegisterPage() {
         body: JSON.stringify(payload),
       })
 
-      const data = await response.json()
-      console.log('Signup response:', data)
+      // Try to parse JSON safely (some errors may return non-JSON bodies)
+      let data: any = null
+      const contentType = response.headers.get('content-type') || ''
+      if (contentType.includes('application/json')) {
+        try {
+          data = await response.json()
+        } catch (parseErr) {
+          console.error('Failed to parse signup response JSON:', parseErr)
+        }
+      } else {
+        // fallback: attempt to read text body
+        try {
+          const text = await response.text()
+          console.log('Signup response (text):', text)
+          data = { message: text }
+        } catch (txtErr) {
+          console.error('Failed to read signup response text:', txtErr)
+        }
+      }
+
+      console.log('Signup response status:', response.status, data)
 
       if (!response.ok) {
         // Show specific validation errors if available
-        if (data.errors && typeof data.errors === 'object') {
+        if (data && data.errors && typeof data.errors === 'object') {
           const errorMessages = Object.values(data.errors).join('. ')
           setError(errorMessages)
         } else {
-          setError(data.message || 'Signup failed')
+          setError((data && data.message) || `Signup failed (status ${response.status})`)
         }
         setIsLoading(false)
         return
       }
 
       // Store the JWT token in localStorage
-      if (data.data?.token) {
-        localStorage.setItem('authToken', data.data.token)
-        localStorage.setItem('user', JSON.stringify(data.data.user))
+      if (data?.data?.token) {
+        try {
+          localStorage.setItem('authToken', data.data.token)
+          localStorage.setItem('user', JSON.stringify(data.data.user))
+        } catch (storageErr) {
+          console.error('Failed to save auth token/user to localStorage:', storageErr)
+        }
       }
 
       // Redirect to profile page
-      window.location.href = "/profile"
+      setIsLoading(false)
+      window.location.href = '/profile'
     } catch (err) {
       setError('Network error. Please try again.')
       setIsLoading(false)
