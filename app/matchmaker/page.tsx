@@ -83,9 +83,12 @@ export default function MatchmakerPage() {
   });
 
   useEffect(() => {
-    checkAuth();
-    fetchUserProfile();
-    fetchRequests();
+    const initializeUser = async () => {
+      checkAuth();
+      await fetchUserProfile();
+      await fetchRequests();
+    };
+    initializeUser();
   }, []);
 
   useEffect(() => {
@@ -114,14 +117,17 @@ export default function MatchmakerPage() {
         const data = await response.json();
         setUserProfile(data);
         setHasProfile(true);
+        return true; // Profile found
       } else if (response.status === 404) {
         setHasProfile(false);
+        return false; // Profile not found
       }
     } catch (error) {
       console.error("Error fetching profile:", error);
     } finally {
       setLoading(false);
     }
+    return false;
   };
 
   const fetchMatches = async () => {
@@ -186,9 +192,37 @@ export default function MatchmakerPage() {
     fetchMatches();
   };
 
-  const handleProfileCreated = () => {
-    fetchUserProfile();
-    setShowProfileDialog(false);
+  const handleProfileCreated = async () => {
+    console.log("Profile created, fetching updated profile...");
+    try {
+      const profileCreated = await fetchUserProfile();
+      console.log("Profile fetch result:", profileCreated);
+      
+      if (profileCreated) {
+        console.log("Profile created successfully, fetching matches and requests...");
+        // Fetch matches and requests after profile is created
+        await fetchMatches();
+        await fetchRequests();
+        console.log("Matches and requests loaded, closing dialog");
+        
+        // Close dialog with slight delay to ensure state is updated
+        setTimeout(() => {
+          setShowProfileDialog(false);
+        }, 500);
+      } else {
+        console.log("Profile not found after creation, reloading page...");
+        // Fallback: reload the page to refresh the profile state
+        setTimeout(() => {
+          window.location.reload();
+        }, 1000);
+      }
+    } catch (error) {
+      console.error("Error in handleProfileCreated:", error);
+      // Fallback: reload the page on error
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
+    }
   };
 
   const handleRequestUpdate = async (requestId: string, status: string) => {
@@ -278,13 +312,27 @@ export default function MatchmakerPage() {
             Connect with travelers who share your passion for exploration
           </p>
         </div>
-        <Button
-          variant="outline"
-          onClick={() => setShowProfileDialog(true)}
-        >
-          <Settings className="mr-2 h-4 w-4" />
-          Edit Profile
-        </Button>
+        <div className="flex items-center gap-4">
+          {userProfile && (
+            <div className="flex items-center gap-3">
+              <Avatar className="h-12 w-12">
+                <AvatarImage src={userProfile.user.avatar || "/placeholder.svg"} alt={userProfile.user.name} />
+                <AvatarFallback>{userProfile.user.name?.charAt(0).toUpperCase() || "U"}</AvatarFallback>
+              </Avatar>
+              <div>
+                <p className="text-sm font-semibold text-white">{userProfile.user.name}</p>
+                <p className="text-xs text-muted-foreground">Travel Buddy</p>
+              </div>
+            </div>
+          )}
+          <Button
+            variant="outline"
+            onClick={() => setShowProfileDialog(true)}
+          >
+            <Settings className="mr-2 h-4 w-4" />
+            Edit Profile
+          </Button>
+        </div>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">

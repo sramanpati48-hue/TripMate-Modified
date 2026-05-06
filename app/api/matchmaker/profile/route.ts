@@ -74,9 +74,11 @@ export async function GET(request: NextRequest) {
 // POST: Create or update travel profile
 export async function POST(request: NextRequest) {
   try {
+    console.log("POST /api/matchmaker/profile - Start");
     // Verify authentication
     const authHeader = request.headers.get("authorization");
     if (!authHeader?.startsWith("Bearer ")) {
+      console.error("Missing authorization header");
       return NextResponse.json(
         { error: "Authentication required" },
         { status: 401 }
@@ -87,6 +89,7 @@ export async function POST(request: NextRequest) {
     const payload = await verifyToken(token);
     
     if (!payload) {
+      console.error("Invalid or expired token");
       return NextResponse.json(
         { error: "Invalid or expired token" },
         { status: 401 }
@@ -94,9 +97,14 @@ export async function POST(request: NextRequest) {
     }
 
     const userId = payload.userId as string;
+    console.log("Authenticated userId:", userId);
 
     // Parse request body
     const body = await request.json();
+    console.log("Request body received:", {
+      ...body,
+      avatar: body.avatar ? `${body.avatar.substring(0, 50)}...` : null,
+    });
     const {
       gender,
       preferredGender,
@@ -115,16 +123,19 @@ export async function POST(request: NextRequest) {
 
     // Validate required fields
     if (!gender || !travelStyle) {
+      console.error("Missing required fields: gender or travelStyle");
       return NextResponse.json(
         { error: "Gender and travel style are required" },
         { status: 400 }
       );
     }
 
+    console.log("Checking if profile exists...");
     // Check if profile exists
     const existingProfile = await prisma.travelProfile.findUnique({
       where: { userId },
     });
+    console.log("Existing profile:", existingProfile ? "found" : "not found");
 
     // Prepare data with JSON stringification
     const profileData = {
@@ -145,6 +156,7 @@ export async function POST(request: NextRequest) {
 
     let profile;
     if (existingProfile) {
+      console.log("Updating existing profile...");
       // Update existing profile
       profile = await prisma.travelProfile.update({
         where: { userId },
@@ -159,7 +171,9 @@ export async function POST(request: NextRequest) {
           },
         },
       });
+      console.log("Profile updated successfully");
     } else {
+      console.log("Creating new profile...");
       // Create new profile
       profile = await prisma.travelProfile.create({
         data: profileData,
@@ -173,15 +187,18 @@ export async function POST(request: NextRequest) {
           },
         },
       });
+      console.log("Profile created successfully");
     }
 
     // Update avatar on User model if provided
-    if (avatar !== undefined) {
+    if (avatar !== undefined && avatar) {
+      console.log("Updating user avatar...");
       await prisma.user.update({
         where: { id: userId },
         data: { avatar }
       });
       
+      console.log("Re-fetching profile with updated avatar...");
       // Re-fetch profile to get updated user data (avatar)
       const freshProfile = await prisma.travelProfile.findUnique({
         where: { userId },
@@ -195,7 +212,10 @@ export async function POST(request: NextRequest) {
           },
         },
       });
-      if (freshProfile) profile = freshProfile;
+      if (freshProfile) {
+        profile = freshProfile;
+        console.log("Profile re-fetched with updated avatar");
+      }
     }
 
 
@@ -218,9 +238,13 @@ export async function POST(request: NextRequest) {
       { status: existingProfile ? 200 : 201 }
     );
   } catch (error) {
-    console.error("Error creating/updating travel profile:", error);
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    console.error("Error creating/updating travel profile:", errorMessage, error);
     return NextResponse.json(
-      { error: "Failed to create/update travel profile" },
+      { 
+        error: "Failed to create/update travel profile",
+        details: errorMessage
+      },
       { status: 500 }
     );
   }

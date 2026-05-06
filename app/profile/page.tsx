@@ -14,6 +14,8 @@ import { EmptyState } from "@/components/empty-state"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { AvatarUpload } from "@/components/avatar-upload"
+import { userEventBus } from "@/lib/user-event"
 
 // Simplified Place type for profile page
 interface ProfilePlace {
@@ -51,8 +53,6 @@ export default function ProfilePage() {
   const [favorites, setFavorites] = useState<ProfilePlace[]>([])
   const [favoritesLoading, setFavoritesLoading] = useState(true)
   const [isAvatarModalOpen, setIsAvatarModalOpen] = useState(false)
-  const [avatarUrl, setAvatarUrl] = useState("")
-  const [isUpdatingAvatar, setIsUpdatingAvatar] = useState(false)
   const router = useRouter()
 
   useEffect(() => {
@@ -149,34 +149,6 @@ export default function ProfilePage() {
     router.push('/login')
   }
 
-  const handleUpdateAvatar = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsUpdatingAvatar(true)
-    try {
-      const token = localStorage.getItem('authToken')
-      const response = await fetch('/api/user/profile', {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ avatar: avatarUrl })
-      })
-      if (response.ok) {
-        const data = await response.json()
-        if (data.success) {
-          setUser(data.data)
-          localStorage.setItem('user', JSON.stringify(data.data))
-          setIsAvatarModalOpen(false)
-        }
-      }
-    } catch (error) {
-      console.error('Failed to update avatar', error)
-    } finally {
-      setIsUpdatingAvatar(false)
-    }
-  }
-
   if (isLoading) {
     return (
       <div className="min-h-screen flex flex-col">
@@ -215,7 +187,6 @@ export default function ProfilePage() {
                   variant="secondary"
                   className="absolute -bottom-1 -right-1 h-8 w-8 rounded-full shadow"
                   onClick={() => {
-                    setAvatarUrl(user.avatar || "")
                     setIsAvatarModalOpen(true)
                   }}
                 >
@@ -387,28 +358,33 @@ export default function ProfilePage() {
           <DialogHeader>
             <DialogTitle>Update Profile Picture</DialogTitle>
             <DialogDescription>
-              Enter a valid image URL for your new profile picture.
+              Upload a new profile picture from your device.
             </DialogDescription>
           </DialogHeader>
-          <form onSubmit={handleUpdateAvatar} className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="avatarUrl">Image URL</Label>
-              <Input
-                id="avatarUrl"
-                placeholder="https://example.com/avatar.jpg"
-                value={avatarUrl}
-                onChange={(e) => setAvatarUrl(e.target.value)}
-              />
-            </div>
-            <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => setIsAvatarModalOpen(false)}>
-                Cancel
-              </Button>
-              <Button type="submit" disabled={isUpdatingAvatar}>
-                {isUpdatingAvatar ? "Updating..." : "Save Picture"}
-              </Button>
-            </DialogFooter>
-          </form>
+          <div className="py-4 flex flex-col items-center">
+            <AvatarUpload 
+              currentAvatar={user?.avatar || null}
+              userName={user?.name || "User"}
+              size="lg"
+              onAvatarChange={(newAvatar) => {
+                const updatedUser = { ...user, avatar: newAvatar };
+                setUser(updatedUser);
+                localStorage.setItem('user', JSON.stringify(updatedUser));
+                // Broadcast user update to all components
+                userEventBus.emit(updatedUser);
+                setIsAvatarModalOpen(false)
+              }}
+            />
+          </div>
+          <DialogFooter>
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={() => setIsAvatarModalOpen(false)}
+            >
+              Close
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
       
