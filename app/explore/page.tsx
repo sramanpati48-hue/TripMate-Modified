@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { useSearchParams } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { Navbar } from "@/components/navbar"
 import { Footer } from "@/components/footer"
 import { SearchBar } from "@/components/search-bar"
@@ -446,6 +446,7 @@ const goaReviews: GoaReview[] = [
 
 export default function ExplorePage() {
   const searchParams = useSearchParams()
+  const router = useRouter()
   const [searchQuery, setSearchQuery] = useState("")
   const [isLoading, setIsLoading] = useState(true)
   const [places, setPlaces] = useState<Place[]>([])
@@ -479,6 +480,10 @@ export default function ExplorePage() {
       setSelectedRegion(capitalizedRegion as Region)
     }
   }, [searchParams])
+
+  useEffect(() => {
+    router.prefetch("/goa-experiences")
+  }, [router])
 
   useEffect(() => {
     // Fetch real-time data from Gemini API with category/region filters
@@ -624,13 +629,7 @@ export default function ExplorePage() {
                 </div>
               </div>
             </div>
-
-
-            <div
-              className="group relative overflow-hidden rounded-[28px] border border-border/70 bg-muted/20 shadow-[0_30px_80px_-45px_rgba(0,0,0,0.45)]"
-              onTouchStart={(event) => handleTouchStart(event.changedTouches[0].clientX)}
-              onTouchEnd={(event) => handleTouchEnd(event.changedTouches[0].clientX)}
-            >
+            <div className="group relative overflow-hidden rounded-[28px] border border-border/70 bg-muted/20 shadow-[0_30px_80px_-45px_rgba(0,0,0,0.45)]">
               <div className="relative h-[420px] sm:h-[500px]">
                 {goaSlides.map((slide, index) => (
                   <div
@@ -678,9 +677,9 @@ export default function ExplorePage() {
                       <div className="max-w-2xl space-y-4 motion-safe:[animation:fadeUp_.7s_ease-out]">
                         <div className="flex flex-wrap items-center gap-2 text-[11px] text-white/85">
                           <span className="inline-flex items-center gap-1 rounded-full border border-white/15 bg-white/12 px-2.5 py-1 backdrop-blur-xl shadow-[0_8px_24px_rgba(0,0,0,0.16)] motion-safe:[animation:floaty_6s_ease-in-out_infinite]">
-                            <Star className="h-3.5 w-3.5 fill-current text-amber-300" />
-                            {slide.rating}
-                          </span>
+                              <Star className="h-3.5 w-3.5 fill-current text-amber-300" />
+                              {slide.rating}
+                            </span>
                           <span className="inline-flex items-center gap-1 rounded-full border border-white/15 bg-white/12 px-2.5 py-1 backdrop-blur-xl shadow-[0_8px_24px_rgba(0,0,0,0.16)] motion-safe:[animation:floaty_6s_ease-in-out_infinite] motion-safe:[animation-delay:0.7s]">
                             <Clock3 className="h-3.5 w-3.5 text-white/80" />
                             {slide.bestTime}
@@ -727,26 +726,26 @@ export default function ExplorePage() {
                         </div>
 
                         <div className="flex flex-wrap items-center gap-3 pt-2">
-                          <button
-                            type="button"
-                            onClick={() => setSelectedGoaHighlight(filteredGoaHighlights[0] ?? goaHighlights[0])}
-                            className="group inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/18 px-5 py-2.5 text-sm font-semibold text-white backdrop-blur-xl transition duration-300 hover:scale-[1.02] hover:bg-white/26 hover:shadow-[0_0_28px_rgba(255,255,255,0.18)]"
-                          >
-                            Explore Experiences
-                            <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-0.5" />
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              const gridNode = document.getElementById("goa-highlights-grid")
-                              gridNode?.scrollIntoView({ behavior: "smooth", block: "start" })
-                            }}
-                            className="group inline-flex items-center gap-2 rounded-full border border-white/18 bg-white/10 px-5 py-2.5 text-sm font-medium text-white/95 backdrop-blur-xl transition duration-300 hover:scale-[1.02] hover:bg-white/20 hover:shadow-[0_0_22px_rgba(255,255,255,0.14)]"
-                          >
-                            View All
-                            <ArrowRight className="h-4 w-4 opacity-70 transition-transform duration-300 group-hover:translate-x-0.5" />
-                          </button>
-                        </div>
+                            <button
+                              type="button"
+                              onClick={() => router.push("/goa-experiences")}
+                              className="group inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/18 px-5 py-2.5 text-sm font-semibold text-white backdrop-blur-xl transition duration-300 hover:scale-[1.02] hover:bg-white/26 hover:shadow-[0_0_28px_rgba(255,255,255,0.18)]"
+                            >
+                              Explore Experiences
+                              <ArrowRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-0.5" />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const gridNode = document.getElementById("goa-highlights-grid")
+                                gridNode?.scrollIntoView({ behavior: "smooth", block: "start" })
+                              }}
+                              className="group inline-flex items-center gap-2 rounded-full border border-white/18 bg-white/10 px-5 py-2.5 text-sm font-medium text-white/95 backdrop-blur-xl transition duration-300 hover:scale-[1.02] hover:bg-white/20 hover:shadow-[0_0_22px_rgba(255,255,255,0.14)]"
+                            >
+                              View All
+                              <ArrowRight className="h-4 w-4 opacity-70 transition-transform duration-300 group-hover:translate-x-0.5" />
+                            </button>
+                          </div>
                       </div>
 
                       <div className="space-y-3 pt-4 motion-safe:[animation:fadeUp_.8s_ease-out]">
