@@ -15,6 +15,7 @@ model User {
   email         String   @unique
   password      String?  // Hashed password (optional for OAuth users)
   name          String
+  role          UserRole @default(USER)
   phone         String?
   avatar        String?  // Profile picture URL
   dateOfBirth   DateTime?
@@ -41,6 +42,10 @@ model User {
   receivedMessages ChatMessage[] @relation("ReceivedMessages")
   accounts      Account[]
   sessions      Session[]
+  // Agency relations
+  travelAgency  TravelAgency?
+  planBookings  PlanBooking[]
+  agencyReviews AgencyReview[]
 }
 
 model Account {
@@ -225,4 +230,157 @@ model ChatMessage {
   createdAt  DateTime @default(now())
 
   @@index([senderId, receiverId])
+}
+
+enum VerificationStatus {
+  PENDING
+  UNDER_REVIEW
+  VERIFIED
+  REJECTED
+  SUSPENDED
+}
+
+enum UserRole {
+  USER
+  AGENCY_OWNER
+  ADMIN
+}
+
+enum AgencyType {
+  TOUR_OPERATOR
+  TRAVEL_AGENT
+  ADVENTURE_SPECIALIST
+  PILGRIMAGE_SPECIALIST
+}
+
+enum DocReviewStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum DocType {
+  BROCHURE
+  OWNER_ID_PROOF
+  OWNER_SELFIE
+  BUSINESS_REGISTRATION
+  GST_CERTIFICATE
+  PAN_CARD
+  TOURISM_LICENSE
+  IDENTITY_PROOF
+  ADDRESS_PROOF
+}
+
+enum PlanCategory {
+  ADVENTURE
+  PILGRIMAGE
+  WILDLIFE
+  BEACH
+  HILL_STATION
+  CULTURAL
+  HONEYMOON
+  FAMILY
+  CORPORATE
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+}
+
+model TravelAgency {
+  id                 String             @id @default(auto()) @map("_id") @db.ObjectId
+  userId             String             @db.ObjectId @unique
+  user               User               @relation(fields: [userId], references: [id])
+  agencyName         String
+  agencyType         AgencyType?
+  registrationNo     String             @unique
+  gstNumber          String?
+  panNumber          String
+  licenseNumber      String
+  website            String?
+  description        String?
+  logoUrl            String?
+  phone              String
+  address            String
+  city               String
+  state              String
+  verificationFee    Float?
+  feePaid            Boolean            @default(false)
+  feeTransactionId   String?
+  feeScreenshotUrl   String?
+  brochureUrl        String?
+  ownerIdProofUrl    String?
+  ownerSelfieUrl     String?
+  registrationStep   Int                @default(1)
+  submittedAt        DateTime?
+  verificationStatus VerificationStatus @default(PENDING)
+  verificationNotes  String?
+  documentsSubmitted AgencyDocument[]
+  plans              AgencyPlan[]
+  reviews            AgencyReview[]
+  createdAt          DateTime           @default(now())
+  updatedAt          DateTime           @updatedAt
+}
+
+model AgencyDocument {
+  id         String       @id @default(auto()) @map("_id") @db.ObjectId
+  agencyId   String       @db.ObjectId
+  agency     TravelAgency @relation(fields: [agencyId], references: [id])
+  docType    DocType
+  fileUrl    String
+  fileName   String
+  reviewStatus DocReviewStatus @default(PENDING)
+  reviewNotes  String?
+  reviewedAt   DateTime?
+  uploadedAt DateTime     @default(now())
+}
+
+model AgencyPlan {
+  id            String       @id @default(auto()) @map("_id") @db.ObjectId
+  agencyId      String       @db.ObjectId
+  agency        TravelAgency @relation(fields: [agencyId], references: [id])
+  title         String
+  description   String
+  destinations  String[]
+  duration      Int
+  pricePerPerson Float
+  maxGroupSize  Int
+  inclusions    String[]
+  exclusions    String[]
+  itinerary     Json
+  images        String[]
+  startDates    String[]
+  category      PlanCategory
+  isActive      Boolean      @default(true)
+  isApproved    Boolean      @default(false)
+  bookings      PlanBooking[]
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+}
+
+model PlanBooking {
+  id         String     @id @default(auto()) @map("_id") @db.ObjectId
+  planId     String     @db.ObjectId
+  plan       AgencyPlan @relation(fields: [planId], references: [id])
+  userId     String     @db.ObjectId
+  user       User       @relation(fields: [userId], references: [id])
+  startDate  String
+  groupSize  Int
+  totalPrice Float
+  status     BookingStatus @default(PENDING)
+  createdAt  DateTime   @default(now())
+}
+
+model AgencyReview {
+  id         String       @id @default(auto()) @map("_id") @db.ObjectId
+  agencyId   String       @db.ObjectId
+  agency     TravelAgency @relation(fields: [agencyId], references: [id])
+  userId     String       @db.ObjectId
+  user       User         @relation(fields: [userId], references: [id])
+  rating     Int
+  comment    String
+  createdAt  DateTime     @default(now())
 }

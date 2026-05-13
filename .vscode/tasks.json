@@ -4,8 +4,9 @@
 		{
 			"label": "dev",
 			"type": "shell",
-			"command": "pnpm",
+			"command": "npm",
 			"args": [
+				"run",
 				"dev"
 			],
 			"isBackground": true,
@@ -17,8 +18,9 @@
 		{
 			"label": "dev",
 			"type": "shell",
-			"command": "pnpm",
+			"command": "npm",
 			"args": [
+				"run",
 				"dev"
 			],
 			"isBackground": true,
@@ -33,7 +35,8 @@
 			"command": "cmd",
 			"args": [
 				"/c",
-				"pnpm",
+				"npm",
+				"run",
 				"dev"
 			],
 			"isBackground": true,
@@ -45,7 +48,7 @@
 		{
 			"label": "run-dev",
 			"type": "shell",
-			"command": "pnpm dev",
+			"command": "npm run dev",
 			"isBackground": true,
 			"group": "build"
 		},

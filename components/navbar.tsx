@@ -87,6 +87,7 @@ export function Navbar() {
 
   const navLinks = [
     { href: "/explore", label: t("navbar.explore"), icon: Compass },
+    { href: "/agencies", label: 'Agencies', icon: MapPin },
     { href: "/transport", label: t("navbar.transport"), icon: Plane },
     { href: "/map", label: t("navbar.map"), icon: Map },
     { href: "/trip-planner", label: t("navbar.tripPlanner"), icon: CalendarDays },
@@ -172,6 +173,12 @@ export function Navbar() {
                     <Link href="/profile" className="cursor-pointer">
                       <Settings className="mr-2 h-4 w-4" />
                       {t("navbar.settings")}
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/agency-portal" className="cursor-pointer flex items-center gap-2">
+                      <MapPin className="mr-2 h-4 w-4" />
+                      Agency Portal
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
